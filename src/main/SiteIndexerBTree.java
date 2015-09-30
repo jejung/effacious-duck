@@ -78,10 +78,7 @@ public class SiteIndexerBTree
 			{
 				return x.elements[j].dataPos;
 			}
-			else 
-			{
-				return this.search(x.getChild(this.ioManager, j), e);
-			}
+			return this.search(x.getChild(this.ioManager, j), e);
 		}
 		
 		return -1;
