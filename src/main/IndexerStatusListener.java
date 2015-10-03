@@ -4,7 +4,7 @@
 package main;
 
 /**
- * @author Johnny
+ * 
  *
  */
 public interface IndexerStatusListener {
