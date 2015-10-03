@@ -27,7 +27,12 @@ public class Main {
 	{
 		SiteConnectionProducer producer = new SiteConnectionProducer();
 		URLExtractor extractor = new URLExtractor(producer);
-		producer.add(new URL("http://www.globo.com/"));
+		try {
+		    producer.add(new URL("http://www.globo.com/"));
+		} catch (InterruptedException e) {
+		    // TODO Auto-generated catch block
+		    e.printStackTrace();
+		}
 		URLConnection connection = null;
 		while ((connection = producer.poll()) != null)
 		{

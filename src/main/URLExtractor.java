@@ -49,7 +49,7 @@ public class URLExtractor {
 				try {
 					if (!el.absUrl("href").isEmpty())
 						producer.add(new URL(el.absUrl("href")));
-				} catch (MalformedURLException e) {
+				} catch (MalformedURLException | InterruptedException e) {
 					// dont worry
 					e.printStackTrace();
 				}
