@@ -16,54 +16,80 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 /**
+ * Class that handle extraction of links in web pages
  * @author jean
- *
+ * @author johnny w. g. g.
  */
-public class URLExtractor {
+public class URLExtractor implements Runnable {
 
-	private SiteConnectionProducer producer;
+	private ConnectionProducer producer;
 	private ThreadPoolExecutor threads;
 	private BlockingQueue<Runnable> threadQueue;
 	private Queue<Document> queue;
 	
-	/**
-	 * 
-	 */
-	public URLExtractor(SiteConnectionProducer producer) {
-		this.producer = producer;
-		this.threadQueue = new LinkedBlockingQueue<>(); 
-		this.queue = new ConcurrentLinkedQueue<>();
-		this.threads = new ThreadPoolExecutor(100, 200, 150000, TimeUnit.MILLISECONDS, threadQueue); 
-	}
+	private URLList urlList;
+	private ConnectionList connectionList;
 	
-	public synchronized void collect(Document doc) {
-		this.queue.add(doc);
-		this.threads.submit(new Extractor());
-	}
 	
-	private class Extractor implements Runnable {
+	@Override
+	public void run() {
 		
-		public void extractURLs(Element el) {
-			
-			if (el.hasAttr("href")) {
-				try {
-					if (!el.absUrl("href").isEmpty())
-						producer.add(new URL(el.absUrl("href")));
-				} catch (MalformedURLException | InterruptedException e) {
-					// dont worry
-					e.printStackTrace();
-				}
-			}
-			for (Element ch: el.children())
-				extractURLs(ch);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void run() {
-			this.extractURLs(queue.poll());
-		}
+//		while (true) {
+//
+//			synchronized (connectionList) {
+//				try {
+//					while (connectionList.isEmpty())
+//						connectionList.wait();
+//				} catch (InterruptedException e) {
+//					break;
+//				}
+//				
+//				
+//				
+//				
+//				connectionList.add(this.executor.submit(new ConnectionCreator(urlList.get())));
+//			}
+//		}
+		
 	}
+	
+//	public URLExtractor(ConnectionProducer producer) {
+//		this.producer = producer;
+//		this.threadQueue = new LinkedBlockingQueue<>(); 
+//		this.queue = new ConcurrentLinkedQueue<>();
+//		this.threads = new ThreadPoolExecutor(100, 200, 150000, TimeUnit.MILLISECONDS, threadQueue); 
+//	}
+//	
+//	public synchronized void collect(Document doc) {
+//		this.queue.add(doc);
+//		this.threads.submit(new Extractor());
+//	}
+//	
+//	private class Extractor implements Runnable {
+//		
+//		public void extractURLs(Element el) {
+//			
+//			if (el.hasAttr("href")) {
+//				try {
+//					if (!el.absUrl("href").isEmpty())
+//						producer.add(new URL(el.absUrl("href")));
+//				} catch (MalformedURLException | InterruptedException e) {
+//					// dont worry
+//					e.printStackTrace();
+//				}
+//			}
+//			for (Element ch: el.children())
+//				extractURLs(ch);
+//		}
+//
+//		/**
+//		 * {@inheritDoc}
+//		 */
+//		@Override
+//		public void run() {
+//			this.extractURLs(queue.poll());
+//		}
+//	}
+//
+//	
 }
