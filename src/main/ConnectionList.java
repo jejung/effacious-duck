@@ -30,6 +30,10 @@ public class ConnectionList {
 		queue.add(connection);
 	}
 	
+	public synchronized boolean isEmpty() {
+		return queue.isEmpty();
+	}
+	
 	/**
 	 * Return an Future of URLConnection that could be completed or not, to get an URLConnection directly use {@link #get()}, but be careful
 	 * @see #get() 

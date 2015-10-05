@@ -28,7 +28,7 @@ public class URLExtractor implements Runnable {
 	private Queue<Document> queue;
 	
 	private URLList urlList;
-	private ConnectionList connectionList;
+	
 	
 	
 	@Override
