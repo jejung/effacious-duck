@@ -5,10 +5,10 @@ A component based Web Crawler
 
 The components:
 
-HTMLPull
-HTMLSpliterator
-URLExtractor
-ConnectionProducer
+#HTMLPull
+#HTMLSpliterator
+#URLExtractor
+#ConnectionProducer
 ...
 
 
