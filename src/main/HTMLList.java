@@ -1,10 +1,11 @@
 package main;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayDeque;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -15,7 +16,7 @@ public class HTMLList {
 
     private static HTMLList instance = new HTMLList();
 
-    private ArrayDeque<Document> documents;
+    private ArrayDeque<Future<Document>> documents;
 
     private ExecutorService executor;
 
@@ -27,24 +28,26 @@ public class HTMLList {
     public static HTMLList getInstance() {
 	return instance;
     }
-    
-    public synchronized Document get() {
+
+    public synchronized Future<Document> getAsFuture() {
 	return documents.poll();
     }
-    
+
     public synchronized void add(InputStream input, String charSet, String baseUri) {
 
-	executor.submit(new Runnable() {
+	documents.add(executor.submit(new Callable<Document>() {
 	    @Override
-	    public void run() {
+	    public Document call() throws Exception {
 		try {
-		    documents.add(Jsoup.parse(input, charSet, baseUri));
-		} catch (IOException e) {
-		    // TODO maybe do some treatment in parse errors or connections problem or just
-		    // don't get mad
+		return Jsoup.parse(input, charSet, baseUri);
+		} catch (Exception e) {
+		    System.out.println(e.getMessage());
 		}
+		return null;
 	    }
-	});
+	}));
+	
+	this.notifyAll();
 
     }
 

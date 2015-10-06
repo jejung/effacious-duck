@@ -38,13 +38,15 @@ public class ConnectionProducer implements Runnable {
 		
 		    while (urlList.isEmpty())
 			urlList.wait();
+		    
+		    
 		
 		} catch (InterruptedException e) {
 		    break;
 		}
-		
+		//System.out.println("ConnecionProducer");
 		connectionList.add(this.executor.submit(new ConnectionCreator(urlList.get())));
-		connectionList.notifyAll();
+		//connectionList.notifyAll();
 	    }
 	}
     }

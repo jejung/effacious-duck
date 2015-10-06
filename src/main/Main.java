@@ -8,49 +8,48 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 /**
+ * @author johnny w. g. g.
  * @author Jean Jung
  */
 public class Main {
 
-	/**
-	 * 
-	 */
-	public Main() {
-	}
+    /**
+     * 
+     */
+    public Main() {
+    }
 
-	/**
-	 * @param args
-	 * @throws IOException
-	 */
-	public static void main(String[] args)
-
-	throws IOException {
-
-		
-		//ConnectionList.getInstance().get
-		
-		
-		// ConnectionProducer producer = new ConnectionProducer();
-		// URLExtractor extractor = new URLExtractor(producer);
-		// try {
-		// producer.add(new URL("http://www.globo.com/"));
-		// } catch (InterruptedException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// URLConnection connection = null;
-		// while ((connection = producer.poll()) != null)
-		// {
-		// System.out.format("Lendo connexão: %s\n", connection.getURL());
-		// Document doc = Jsoup.parse(connection.getInputStream(),
-		// connection.getContentEncoding(),connection.getURL().getPath());
-		// extractor.collect(doc);
-		// }
-
-		// View view = new View();
-		// view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		// view.pack();
-		// view.setLocationRelativeTo(null);
-		// view.setVisible(true);
-	}
+    /**
+     * @param args
+     * @throws IOException
+     */
+    public static void main(String[] args) throws IOException {
+	
+	ConnectionList connList = ConnectionList.getInstance();
+	URLList urlList = URLList.getInstance();
+	HTMLList htmlList = HTMLList.getInstance();
+	
+	urlList.add(new URL("http://g1.globo.com"));
+	urlList.add(new URL("http://www.tecmundo.com.br"));
+	urlList.add(new URL("http://docs.oracle.com"));
+	
+	
+	ConnectionProducer connProducer = new ConnectionProducer(urlList, connList);
+	HTMLPull htmlPull = new HTMLPull(connList, htmlList);
+	URLExtractor urlExtractor = new URLExtractor(urlList);
+	HTMLSpliterator htmlSplit = new HTMLSpliterator(htmlList, urlExtractor);
+	
+	
+	Thread t1 = new Thread(connProducer);
+	Thread t2 = new Thread(htmlPull);
+	Thread t3 = new Thread(urlExtractor);
+	Thread t4 = new Thread(htmlSplit);
+	
+	
+	t1.start();
+	t2.start();
+	t3.start();
+	t4.start();
+	
+    }
 }

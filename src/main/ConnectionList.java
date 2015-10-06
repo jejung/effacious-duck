@@ -27,7 +27,13 @@ public class ConnectionList {
 	}
 
 	public synchronized void add(Future<URLConnection> connection) {
-		queue.add(connection);
+		
+	    	queue.add(connection);
+		this.notifyAll();
+	}
+	
+	public synchronized boolean isFull() {
+	    return queue.size() > 1000;
 	}
 	
 	public synchronized boolean isEmpty() {

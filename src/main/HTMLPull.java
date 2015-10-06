@@ -34,10 +34,14 @@ public class HTMLPull implements Runnable {
 
 		    URLConnection conn;
 
+		    
+		  //  System.out.println("html pull");
+		    
 		    conn = connectionList.getAsFuture().get();
 		    htmlList.add(conn.getInputStream(), conn.getContentEncoding(), conn.getURL().getPath());
 		    
 		} catch (InterruptedException | ExecutionException | IOException e) {
+		    System.out.println(e.getMessage());
 		    break;
 		}
 
