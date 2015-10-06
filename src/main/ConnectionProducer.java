@@ -20,97 +20,56 @@ import java.util.concurrent.Semaphore;
  */
 public class ConnectionProducer implements Runnable {
 
-	private static final int MAX_CONNECTIONS = 50;
+    private static final int MAX_CONNECTIONS = 50;
 
-	private ExecutorService executor;
+    private ExecutorService executor;
 
-	//private Queue<Future<URLConnection>> connections;
+    private URLList urlList;
+    private ConnectionList connectionList;
 
-	//private Object pollLock;
-	// private Object addLock;
+    @Override
+    public void run() {
 
-	//private Semaphore sem = new Semaphore(MAX_CONNECTIONS);
+	while (true) {
 
-	// private BlockingQueue<Runnable> runnables;
+	    synchronized (urlList) {
+		
+		try {
+		
+		    while (urlList.isEmpty())
+			urlList.wait();
+		
+		} catch (InterruptedException e) {
+		    break;
+		}
+		
+		connectionList.add(this.executor.submit(new ConnectionCreator(urlList.get())));
+		connectionList.notifyAll();
+	    }
+	}
+    }
 
-	private URLList urlList;
-	private ConnectionList connectionList;
+    public ConnectionProducer(URLList urlList, ConnectionList connectionList) {
+
+	this.urlList = urlList;
+	this.connectionList = connectionList;
+
+	this.executor = Executors.newFixedThreadPool(MAX_CONNECTIONS);
+
+    }
+
+    private class ConnectionCreator implements Callable<URLConnection> {
+
+	private URL uri;
+
+	public ConnectionCreator(URL uri) {
+	    this.uri = uri;
+	}
 
 	@Override
-	public void run() {
-
-		while (true) {
-
-			synchronized (urlList) {
-				try {
-					while (urlList.isEmpty())
-						urlList.wait();
-				} catch (InterruptedException e) {
-					break;
-				}
-				connectionList.add(this.executor.submit(new ConnectionCreator(urlList.get())));
-			}
-		}
+	public URLConnection call() throws Exception {
+	    return uri.openConnection();
 	}
-
-	public ConnectionProducer(URLList urlList, ConnectionList connectionList) {
-
-		this.urlList = urlList;
-		this.connectionList = connectionList;
-
-		// this.runnables = new LinkedBlockingQueue<>();
-		//this.pollLock = new Object();
-		// this.addLock = new Object();
-		this.executor = Executors.newFixedThreadPool(MAX_CONNECTIONS);
-
-	}
-
-//	/**
-//	 * 
-//	 * @param uri
-//	 * @return
-//	 * @throws InterruptedException
-//	 */
-//	@Deprecated
-//	public Future<URLConnection> add(URL uri) throws InterruptedException {
-//
-//		sem.acquire();
-//
-//		try {
-//
-//			this.urlList.add(uri);
-//
-//			ConnectionCreator creator = new ConnectionCreator(uri);
-//
-//			Future<URLConnection> future = this.executor.submit(creator);
-//
-//			return future;
-//
-//		} finally {
-//			sem.release();
-//		}
-//	}
-
-//	@Deprecated
-//	public URLConnection poll() {
-//		synchronized (this.pollLock) {
-//			// TODO: Fazer await.
-//			return this.connections.poll();
-//		}
-//	}
-
-	private class ConnectionCreator implements Callable<URLConnection> {
-
-		private URL uri;
-
-		public ConnectionCreator(URL uri) {
-			this.uri = uri;
-		}
-
-		@Override
-		public URLConnection call() throws Exception {
-			return uri.openConnection();
-		}
-	}
+    }
 
 }

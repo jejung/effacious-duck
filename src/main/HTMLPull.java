@@ -1,6 +1,8 @@
 package main;
 
-import java.util.concurrent.Future;
+import java.io.IOException;
+import java.net.URLConnection;
+import java.util.concurrent.ExecutionException;
 
 /**
  * 
@@ -9,32 +11,38 @@ import java.util.concurrent.Future;
  */
 public class HTMLPull implements Runnable {
 
-	private ConnectionList connectionList;
+    private ConnectionList connectionList;
+    private HTMLList htmlList;
 
-	public HTMLPull(ConnectionList connectionList) {
+    public HTMLPull(ConnectionList connectionList, HTMLList htmlList) {
 
-		this.connectionList = connectionList;
+	this.connectionList = connectionList;
+	this.htmlList = htmlList;
+    }
 
-	}
+    @Override
+    public void run() {
 
-	@Override
-	public void run() {
+	while (true) {
 
-		while (true) {
+	    synchronized (connectionList) {
 
-			synchronized (connectionList) {
-				try {
-					while (connectionList.isEmpty())
-						connectionList.wait();
-				} catch (InterruptedException e) {
-					break;
-				}
+		try {
+		    
+		    while (connectionList.isEmpty())
+			connectionList.wait();
 
-				
-				
-				
-			}
+		    URLConnection conn;
+
+		    conn = connectionList.getAsFuture().get();
+		    htmlList.add(conn.getInputStream(), conn.getContentEncoding(), conn.getURL().getPath());
+		    
+		} catch (InterruptedException | ExecutionException | IOException e) {
+		    break;
 		}
 
+	    }
 	}
+
+    }
 }
