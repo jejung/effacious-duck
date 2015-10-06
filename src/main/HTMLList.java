@@ -12,47 +12,55 @@ import org.jsoup.nodes.Document;
 
 public class HTMLList {
 
-    private static final int MAX_CONNECTIONS = 50;
+	private static final int MAX_CONNECTIONS = 50;
 
-    private static HTMLList instance = new HTMLList();
+	private static HTMLList instance = new HTMLList();
 
-    private ArrayDeque<Future<Document>> documents;
+	private ArrayDeque<Future<Document>> documents;
 
-    private ExecutorService executor;
+	private ExecutorService executor;
 
-    private HTMLList() {
-	documents = new ArrayDeque<>();
-	executor = Executors.newFixedThreadPool(MAX_CONNECTIONS);
-    }
+	private HTMLList() {
+		documents = new ArrayDeque<>();
+		executor = Executors.newFixedThreadPool(MAX_CONNECTIONS);
+	}
 
-    public static HTMLList getInstance() {
-	return instance;
-    }
+	public static HTMLList getInstance() {
+		return instance;
+	}
 
-    public synchronized Future<Document> getAsFuture() {
-	return documents.poll();
-    }
+	public synchronized Future<Document> getAsFuture() {
+		return documents.poll();
+	}
 
-    public synchronized void add(InputStream input, String charSet, String baseUri) {
+	public synchronized void add(InputStream input, String charSet, String baseUri) {
 
-	documents.add(executor.submit(new Callable<Document>() {
-	    @Override
-	    public Document call() throws Exception {
-		try {
-		return Jsoup.parse(input, charSet, baseUri);
-		} catch (Exception e) {
-		    System.out.println(e.getMessage());
-		}
-		return null;
-	    }
-	}));
-	
-	this.notifyAll();
+		System.out.println("SIZE HTML LIST " + documents.size());
+		
+		documents.add(executor.submit(new Callable<Document>() {
+			@Override
+			public Document call() throws Exception {
+				try {
+					
+					Document doc = Jsoup.parse(input, charSet, baseUri);
 
-    }
+					return doc;
 
-    public synchronized boolean isEmpty() {
-	return documents.isEmpty();
-    }
+				} catch (Exception e) {
+					System.out.println(e.getMessage());
+				} finally {
+					input.close();
+				}
+				return null;
+			}
+		}));
+
+		this.notifyAll();
+
+	}
+
+	public synchronized boolean isEmpty() {
+		return documents.isEmpty();
+	}
 
 }

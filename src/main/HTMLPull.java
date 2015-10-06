@@ -34,6 +34,7 @@ public class HTMLPull implements Runnable {
 
 		    URLConnection conn;
 
+		    connectionList.wait(35);
 		    
 		  //  System.out.println("html pull");
 		    

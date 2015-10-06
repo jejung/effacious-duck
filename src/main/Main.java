@@ -13,9 +13,12 @@ import org.jsoup.nodes.Document;
  */
 public class Main {
 
-    /**
-     * 
-     */
+    
+	static volatile ConnectionList connList = ConnectionList.getInstance();
+	static volatile URLList urlList = URLList.getInstance();
+	static volatile HTMLList htmlList = HTMLList.getInstance();
+	
+	
     public Main() {
     }
 
@@ -25,9 +28,6 @@ public class Main {
      */
     public static void main(String[] args) throws IOException {
 	
-	ConnectionList connList = ConnectionList.getInstance();
-	URLList urlList = URLList.getInstance();
-	HTMLList htmlList = HTMLList.getInstance();
 	
 	urlList.add(new URL("http://g1.globo.com"));
 	urlList.add(new URL("http://www.tecmundo.com.br"));

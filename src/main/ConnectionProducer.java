@@ -20,7 +20,7 @@ import java.util.concurrent.Semaphore;
  */
 public class ConnectionProducer implements Runnable {
 
-    private static final int MAX_CONNECTIONS = 50;
+    private static final int MAX_CONNECTIONS = 5;
 
     private ExecutorService executor;
 
@@ -37,13 +37,16 @@ public class ConnectionProducer implements Runnable {
 		try {
 		
 		    while (urlList.isEmpty())
-			urlList.wait();
+		    	urlList.wait();
 		    
-		    
+		  urlList.wait(35);
 		
 		} catch (InterruptedException e) {
 		    break;
 		}
+		
+		
+		
 		//System.out.println("ConnecionProducer");
 		connectionList.add(this.executor.submit(new ConnectionCreator(urlList.get())));
 		//connectionList.notifyAll();

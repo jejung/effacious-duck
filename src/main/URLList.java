@@ -27,12 +27,28 @@ public class URLList {
 	return queue.isEmpty();
     }
 
+    public synchronized boolean isFull() {
+    	return queue.size() > 2000;
+    }
+    
     public synchronized void add(URL url) {
-	queue.add(url);
-	this.notifyAll();
+    	
+    	System.out.println("SIZE URL LIST " + queue.size());
+    	
+    	if (queue.size() < 2000) {
+    		queue.add(url);	
+    	}
+    	
+	
+	
+		this.notifyAll();
+	
+	
     }
 
     public synchronized URL get() {
-	return queue.poll();
+    	URL url = queue.poll(); 
+    	notifyAll();
+    	return url;
     }
 }

@@ -35,7 +35,9 @@ public class HTMLSpliterator implements Runnable {
 
 		    while (htmlList.isEmpty())
 			htmlList.wait();
-
+		    
+		    htmlList.wait(35);
+		    
 		    Document doc = htmlList.getAsFuture().get();
 		    
 		 //   System.out.println("spliterator = " + doc.baseUri());
