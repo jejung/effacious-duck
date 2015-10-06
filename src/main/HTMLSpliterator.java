@@ -12,45 +12,39 @@ import org.jsoup.nodes.Document;
  */
 public class HTMLSpliterator implements Runnable {
 
-    private HTMLList htmlList;
-    private URLExtractor urlExtractor;
+	private HTMLList htmlList;
+	private URLExtractor urlExtractor;
 
-    public HTMLSpliterator(HTMLList htmlList, URLExtractor urlExtractor) {
-	this.htmlList = htmlList;
-	this.urlExtractor = urlExtractor;
-    }
-
-    private void sendToURLExtractor(Document doc) {
-
-    }
-
-    @Override
-    public void run() {
-
-	while (true) {
-
-	    synchronized (htmlList) {
-
-		try {
-
-		    while (htmlList.isEmpty())
-			htmlList.wait();
-		    
-		    htmlList.wait(35);
-		    
-		    Document doc = htmlList.getAsFuture().get();
-		    
-		 //   System.out.println("spliterator = " + doc.baseUri());
-		    
-		    urlExtractor.addDocument(doc);
-
-		} catch (InterruptedException | ExecutionException e) {
-		    break;
-		}
-
-	    }
+	public HTMLSpliterator(HTMLList htmlList, URLExtractor urlExtractor) {
+		this.htmlList = htmlList;
+		this.urlExtractor = urlExtractor;
 	}
 
-    }
+	private void sendToURLExtractor(Document doc) {
+
+	}
+
+	@Override
+	public void run() {
+
+		while (true) {
+
+			Document doc;
+		
+			try {
+				
+				doc = htmlList.getAsFuture().get();
+			
+				urlExtractor.addDocument(doc);
+		
+			} catch (InterruptedException | ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			// System.out.println("spliterator = " + doc.baseUri());
+
+		}
+	}
 
 }

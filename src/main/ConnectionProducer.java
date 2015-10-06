@@ -20,61 +20,49 @@ import java.util.concurrent.Semaphore;
  */
 public class ConnectionProducer implements Runnable {
 
-    private static final int MAX_CONNECTIONS = 5;
+	private static final int MAX_CONNECTIONS = 5;
 
-    private ExecutorService executor;
+	private ExecutorService executor;
 
-    private URLList urlList;
-    private ConnectionList connectionList;
-
-    @Override
-    public void run() {
-
-	while (true) {
-
-	    synchronized (urlList) {
-		
-		try {
-		
-		    while (urlList.isEmpty())
-		    	urlList.wait();
-		    
-		  urlList.wait(35);
-		
-		} catch (InterruptedException e) {
-		    break;
-		}
-		
-		
-		
-		//System.out.println("ConnecionProducer");
-		connectionList.add(this.executor.submit(new ConnectionCreator(urlList.get())));
-		//connectionList.notifyAll();
-	    }
-	}
-    }
-
-    public ConnectionProducer(URLList urlList, ConnectionList connectionList) {
-
-	this.urlList = urlList;
-	this.connectionList = connectionList;
-
-	this.executor = Executors.newFixedThreadPool(MAX_CONNECTIONS);
-
-    }
-
-    private class ConnectionCreator implements Callable<URLConnection> {
-
-	private URL uri;
-
-	public ConnectionCreator(URL uri) {
-	    this.uri = uri;
-	}
+	private URLList urlList;
+	private ConnectionList connectionList;
 
 	@Override
-	public URLConnection call() throws Exception {
-	    return uri.openConnection();
+	public void run() {
+
+		while (true) {
+			
+			//System.out.println("SIZEof urlList " + urlList.size());
+			
+			// System.out.println("ConnecionProducer");
+			connectionList.add(this.executor.submit(new ConnectionCreator(urlList.get())));
+			// connectionList.notifyAll();
+		
+		}
+
 	}
-    }
+
+	public ConnectionProducer(URLList urlList, ConnectionList connectionList) {
+
+		this.urlList = urlList;
+		this.connectionList = connectionList;
+
+		this.executor = Executors.newFixedThreadPool(MAX_CONNECTIONS);
+
+	}
+
+	private class ConnectionCreator implements Callable<URLConnection> {
+
+		private URL uri;
+
+		public ConnectionCreator(URL uri) {
+			this.uri = uri;
+		}
+
+		@Override
+		public URLConnection call() throws Exception {
+			return uri.openConnection();
+		}
+	}
 
 }

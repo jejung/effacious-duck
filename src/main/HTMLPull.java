@@ -11,43 +11,32 @@ import java.util.concurrent.ExecutionException;
  */
 public class HTMLPull implements Runnable {
 
-    private ConnectionList connectionList;
-    private HTMLList htmlList;
+	private ConnectionList connectionList;
+	private HTMLList htmlList;
 
-    public HTMLPull(ConnectionList connectionList, HTMLList htmlList) {
+	public HTMLPull(ConnectionList connectionList, HTMLList htmlList) {
 
-	this.connectionList = connectionList;
-	this.htmlList = htmlList;
-    }
-
-    @Override
-    public void run() {
-
-	while (true) {
-
-	    synchronized (connectionList) {
-
-		try {
-		    
-		    while (connectionList.isEmpty())
-			connectionList.wait();
-
-		    URLConnection conn;
-
-		    connectionList.wait(35);
-		    
-		  //  System.out.println("html pull");
-		    
-		    conn = connectionList.getAsFuture().get();
-		    htmlList.add(conn.getInputStream(), conn.getContentEncoding(), conn.getURL().getPath());
-		    
-		} catch (InterruptedException | ExecutionException | IOException e) {
-		    System.out.println(e.getMessage());
-		    break;
-		}
-
-	    }
+		this.connectionList = connectionList;
+		this.htmlList = htmlList;
 	}
 
-    }
+	@Override
+	public void run() {
+
+		while (true) {
+
+			URLConnection conn;
+
+			try {
+				
+				conn = connectionList.getAsFuture().get();
+				htmlList.add(conn.getInputStream(), conn.getContentEncoding(), conn.getURL().getPath());
+			
+			} catch (IOException | InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+
+		}
+
+	}
 }

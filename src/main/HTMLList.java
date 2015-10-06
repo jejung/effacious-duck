@@ -30,18 +30,33 @@ public class HTMLList {
 	}
 
 	public synchronized Future<Document> getAsFuture() {
-		return documents.poll();
+
+		try {
+			
+			while (isEmpty())
+				wait();
+
+			Future<Document> future = documents.poll();
+
+			notifyAll();
+
+			return future;
+
+		} catch (InterruptedException e) {
+			return null;
+		}
+
 	}
 
 	public synchronized void add(InputStream input, String charSet, String baseUri) {
 
-		System.out.println("SIZE HTML LIST " + documents.size());
-		
+		//System.out.println("SIZE HTML LIST " + documents.size());
+
 		documents.add(executor.submit(new Callable<Document>() {
 			@Override
 			public Document call() throws Exception {
 				try {
-					
+
 					Document doc = Jsoup.parse(input, charSet, baseUri);
 
 					return doc;

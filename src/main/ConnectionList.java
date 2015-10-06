@@ -16,9 +16,7 @@ public class ConnectionList {
 
 	private volatile Queue<Future<URLConnection>> queue;
 	private static ConnectionList instance = new ConnectionList();
-	
-	private volatile static int size = 0;
-	
+
 	private ConnectionList() {
 		this.queue = new ArrayDeque<>();
 
@@ -29,16 +27,17 @@ public class ConnectionList {
 	}
 
 	public synchronized void add(Future<URLConnection> connection) {
-		
-		System.out.println("SIZE CONNECTION LIST " + queue.size());
-		
-		if (queue.size() < 2000) {
-			//stem.out.println("ENTROU");
+
+		try {
+			while (isFull())
+				wait();
+
 			queue.add(connection);
-		//	size++;
-		} 
 			
-		
+		} catch (InterruptedException e) {
+
+		}
+
 		this.notifyAll();
 	}
 
@@ -58,8 +57,22 @@ public class ConnectionList {
 	 * @return
 	 */
 	public synchronized Future<URLConnection> getAsFuture() {
-		size--;
-		return queue.poll();
+
+		try {
+
+			while (isEmpty())
+				wait();
+
+			Future<URLConnection> future = queue.poll();
+
+			notifyAll();
+
+			return future;
+
+		} catch (InterruptedException e) {
+			return null;
+		}
+
 	}
 
 	/**
