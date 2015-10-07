@@ -1,7 +1,6 @@
 # effacious-duck
-FURB
 
-A component based Web Crawler 
+A component based Web Crawler API for scraping purposes.
 
 The components:
 
