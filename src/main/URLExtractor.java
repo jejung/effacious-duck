@@ -31,14 +31,16 @@ public class URLExtractor implements Runnable {
 
 	private URLList urlList;
 
-	private static final int MAX_CONNECTIONS = 5;
+	private static final int MAX_EXTRACTORS = 10;
+	
+	private static final int MAX_DOCUMENTS = 300;
 
 	// TODO tem que ser synchronized
-	int mapped = 0;
+	volatile int mapped = 0;
 
 	private ExecutorService executor;
 
-	private volatile Semaphore sem = new Semaphore(MAX_CONNECTIONS);
+	private volatile Semaphore sem = new Semaphore(MAX_EXTRACTORS);
 
 	@Deprecated
 	private class FuturePoolController extends Thread {
@@ -104,7 +106,7 @@ public class URLExtractor implements Runnable {
 	public URLExtractor(URLList urlList) {
 		docs = new ArrayDeque<>();
 		this.urlList = urlList;
-		executor = Executors.newFixedThreadPool(MAX_CONNECTIONS);
+		executor = Executors.newFixedThreadPool(MAX_EXTRACTORS);
 
 	}
 
@@ -112,11 +114,10 @@ public class URLExtractor implements Runnable {
 
 		synchronized (lock) {
 
-			while (docs.size() > 40)
+			while (docs.size() > MAX_DOCUMENTS)
 				try {
 					lock.wait();
 				} catch (InterruptedException e) {
-
 					e.printStackTrace();
 				}
 
@@ -126,7 +127,11 @@ public class URLExtractor implements Runnable {
 
 		}
 	}
-
+	
+	private synchronized int mapped() {
+		return ++mapped;
+	}
+	
 	private void extract(Element el) {
 
 		Elements links = el.getElementsByTag("a");
@@ -139,9 +144,9 @@ public class URLExtractor implements Runnable {
 					// pages
 					// could be used to remove https pages, this would be
 					// configurable in the application
-					if (href.startsWith("https")) {
-						href = href.replaceFirst("s", "");
-					}
+//					if (href.startsWith("https")) {
+//						href = href.replaceFirst("s", "");
+//					}
 					urlList.add(new URL(href));
 
 				} else {
@@ -153,7 +158,7 @@ public class URLExtractor implements Runnable {
 			}
 		}
 
-		System.out.println(mapped++ + " pages indexed so far.");
+		System.err.println(mapped() + " pages indexed so far.");
 
 	}
 
@@ -181,6 +186,7 @@ public class URLExtractor implements Runnable {
 								return null;
 							} finally {
 								sem.release();
+								//System.out.println("releasing sem: " + sem.availablePermits());
 								lock.notifyAll();
 							}
 						}

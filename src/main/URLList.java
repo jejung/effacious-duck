@@ -54,7 +54,7 @@ public class URLList {
 		queue.add(url);
 		// System.err.println("ADDED " + url);
 
-		// this.notifyAll();
+		 this.notifyAll();
 
 	}
 

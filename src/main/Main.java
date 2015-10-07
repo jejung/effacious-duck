@@ -37,9 +37,11 @@ public class Main {
 		Thread t3 = new Thread(urlExtractor);
 		Thread t4 = new Thread(htmlSplit);
 		
-		t1.setPriority(1);
 		t3.setPriority(10);
 		
+		t1.setPriority(1);
+		t2.setPriority(1);
+		t4.setPriority(1);
 		
 		t1.start();
 		t2.start();
