@@ -22,8 +22,11 @@ public class HTMLPull implements Runnable {
 	public void run() {
 		while (true) {
 			try {
+			
 				URLConnection con = this.connectionList.getAsFuture().get();
+			
 				htmlList.add(con);
+		
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}

@@ -25,11 +25,11 @@ public class ConnectionProducer implements Runnable {
 
 	@Override
 	public void run() {
+
 		while (true) {
-			//System.out.println("SIZEof urlList " + urlList.size());
-			// System.out.println("ConnecionProducer");
+
 			connectionList.add(this.executor.submit(new ConnectionCreator(urlList.get())));
-			// connectionList.notifyAll();
+
 		}
 	}
 

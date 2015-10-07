@@ -24,14 +24,22 @@ public class HTMLSpliterator implements Runnable {
 	public void run() {
 
 		while (true) {
+
 			Document doc;
+
 			try {
+
 				doc = htmlList.getAsFuture().get();
-				urlExtractor.addDocument(doc);
+
+				// TODO fix in some way that don't need this if clause
+				// could be happen in some cases of timeout connection
+				if (doc != null)
+					urlExtractor.addDocument(doc);
+
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
-			// System.out.println("spliterator = " + doc.baseUri());
+
 		}
 	}
 }

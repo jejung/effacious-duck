@@ -7,16 +7,20 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
- * Thread-Safe list of connections that holds all the open and not used connections.
- * Internally it uses a {@link Queue} to hold the connection and return the first open. 
+ * Thread-Safe list of connections that holds all the open and not used
+ * connections. Internally it uses a {@link Queue} to hold the connection and
+ * return the first open.
  * 
  * @author johnny w. g. g.
  *
  */
 public class ConnectionList {
 
-	private volatile Queue<Future<URLConnection>> queue;
+	private Queue<Future<URLConnection>> queue;
 	private static ConnectionList instance = new ConnectionList();
+
+	// TODO create an .ini file or store these values in a DB
+	private static final int MAX_CONNECTIONS = 40;
 
 	private ConnectionList() {
 		this.queue = new ArrayDeque<>();
@@ -28,8 +32,11 @@ public class ConnectionList {
 
 	public synchronized void add(Future<URLConnection> connection) {
 		try {
-			while (isFull())
+
+			while (isFull()) {
 				wait();
+			}
+
 			queue.add(connection);
 		} catch (InterruptedException e) {
 		}
@@ -37,7 +44,7 @@ public class ConnectionList {
 	}
 
 	public synchronized boolean isFull() {
-		return queue.size() > 1000;
+		return queue.size() > MAX_CONNECTIONS;
 	}
 
 	public synchronized boolean isEmpty() {
@@ -50,11 +57,14 @@ public class ConnectionList {
 	 * 
 	 * @see #get()
 	 * @return
+	 * @throws ExecutionException
 	 */
-	public synchronized Future<URLConnection> getAsFuture() {
+	public synchronized Future<URLConnection> getAsFuture() throws ExecutionException {
 		try {
-			while (isEmpty())
+			while (isEmpty()) {
 				wait();
+			}
+
 			Future<URLConnection> future = queue.poll();
 			notifyAll();
 			return future;
@@ -68,9 +78,10 @@ public class ConnectionList {
 	 * connection is completed. Use {@link #getAsFuture()} instead
 	 * 
 	 * @see #getAsFuture()
-	 * @return
+	 * @return the connection if exists, null otherwise
 	 * @throws InterruptedException
-	 * @throws ExecutionException
+	 *             if this thread was interruped
+	 * 
 	 */
 	public synchronized URLConnection get() throws InterruptedException, ExecutionException {
 		return queue.poll().get();

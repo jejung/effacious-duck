@@ -104,14 +104,21 @@ public class URLExtractor implements Runnable {
 	public URLExtractor(URLList urlList) {
 		docs = new ArrayDeque<>();
 		this.urlList = urlList;
-
 		executor = Executors.newFixedThreadPool(MAX_CONNECTIONS);
 
 	}
 
 	public void addDocument(Document doc) {
-		// System.out.println("BEORE CRITICAL SESSION");
+
 		synchronized (lock) {
+
+			while (docs.size() > 40)
+				try {
+					lock.wait();
+				} catch (InterruptedException e) {
+
+					e.printStackTrace();
+				}
 
 			docs.add(doc);
 
@@ -126,19 +133,27 @@ public class URLExtractor implements Runnable {
 		for (Element link : links) {
 			try {
 				String href = link.absUrl("href");
-				if (!(href.endsWith(".pdf") || 
-					  href.endsWith(".jpg") || 
-					  href.endsWith(".avi"))) {
+				if (!(href.endsWith(".pdf") || href.endsWith(".jpg") || href.endsWith(".avi"))) {
+
+					// TODO create an machanism to configure permission of https
+					// pages
+					// could be used to remove https pages, this would be
+					// configurable in the application
+					if (href.startsWith("https")) {
+						href = href.replaceFirst("s", "");
+					}
 					urlList.add(new URL(href));
-//					System.out.println("Link found: " + href);
-					System.out.println("Mapped = " + mapped++);
+
 				} else {
+					// TODO maybe store images on database
 					System.out.println("Midia ignored: " + href);
 				}
 			} catch (MalformedURLException e) {
-				 System.err.println(e.getMessage());
+
 			}
 		}
+
+		System.out.println(mapped++ + " pages indexed so far.");
 
 	}
 
@@ -156,6 +171,7 @@ public class URLExtractor implements Runnable {
 						lock.wait();
 					}
 					sem.acquire();
+
 					executor.submit(new Callable<Void>() {
 						@Override
 						public Void call() throws Exception {
@@ -165,11 +181,13 @@ public class URLExtractor implements Runnable {
 								return null;
 							} finally {
 								sem.release();
+								lock.notifyAll();
 							}
 						}
 					});
 				}
 			} catch (InterruptedException e) {
+				e.printStackTrace();
 				break;
 			}
 		}

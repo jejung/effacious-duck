@@ -13,16 +13,19 @@ import org.jsoup.nodes.Document;
 
 /**
  * 
- * @author Jean Jung 
+ * @author Jean Jung
  * @author johnny w. g. g.
  */
 public class HTMLList {
 
-	private static final int MAX_CONNECTIONS = 50;
+	private static final int MAX_CONNECTIONS = 5;
 
 	private static HTMLList instance = new HTMLList();
 
 	private ArrayDeque<Future<Document>> documents;
+
+	// TODO create an .ini file or store these values in a DB
+	private static final int MAX_DOCS = 40;
 
 	private ExecutorService executor;
 
@@ -38,7 +41,7 @@ public class HTMLList {
 	public synchronized Future<Document> getAsFuture() {
 
 		try {
-			
+
 			while (isEmpty())
 				wait();
 
@@ -56,25 +59,31 @@ public class HTMLList {
 
 	public synchronized void add(URLConnection con) {
 
-		//System.out.println("SIZE HTML LIST " + documents.size());
+		while (isFull())
+
+			try {
+				wait();
+			} catch (InterruptedException e1) {
+
+			}
 
 		documents.add(executor.submit(new Callable<Document>() {
 			@Override
 			public Document call() throws Exception {
-				System.out.println("Getting inputStream from: " + con.getURL());
-				try (InputStream inputStream = con.getInputStream();){
-					
+
+				try (InputStream inputStream = con.getInputStream();) {
+
 					Document doc = Jsoup.parse(inputStream, con.getContentEncoding(), con.getURL().toString());
 					return doc;
 				} catch (Exception e) {
 					System.out.println(e.getMessage());
 				}
-				
+
 				return null;
 			}
 		}));
 
-		this.notifyAll();
+		notifyAll();
 
 	}
 
@@ -82,4 +91,7 @@ public class HTMLList {
 		return documents.isEmpty();
 	}
 
+	public synchronized boolean isFull() {
+		return documents.size() > MAX_DOCS;
+	}
 }
