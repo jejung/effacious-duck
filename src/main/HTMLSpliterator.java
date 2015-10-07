@@ -20,31 +20,18 @@ public class HTMLSpliterator implements Runnable {
 		this.urlExtractor = urlExtractor;
 	}
 
-	private void sendToURLExtractor(Document doc) {
-
-	}
-
 	@Override
 	public void run() {
 
 		while (true) {
-
 			Document doc;
-		
 			try {
-				
 				doc = htmlList.getAsFuture().get();
-			
 				urlExtractor.addDocument(doc);
-		
 			} catch (InterruptedException | ExecutionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 			// System.out.println("spliterator = " + doc.baseUri());
-
 		}
 	}
-
 }

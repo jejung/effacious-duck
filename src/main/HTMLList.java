@@ -1,6 +1,7 @@
 package main;
 
 import java.io.InputStream;
+import java.net.URLConnection;
 import java.util.ArrayDeque;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -10,6 +11,11 @@ import java.util.concurrent.Future;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+/**
+ * 
+ * @author Jean Jung 
+ * @author johnny w. g. g.
+ */
 public class HTMLList {
 
 	private static final int MAX_CONNECTIONS = 50;
@@ -48,24 +54,22 @@ public class HTMLList {
 
 	}
 
-	public synchronized void add(InputStream input, String charSet, String baseUri) {
+	public synchronized void add(URLConnection con) {
 
 		//System.out.println("SIZE HTML LIST " + documents.size());
 
 		documents.add(executor.submit(new Callable<Document>() {
 			@Override
 			public Document call() throws Exception {
-				try {
-
-					Document doc = Jsoup.parse(input, charSet, baseUri);
-
+				System.out.println("Getting inputStream from: " + con.getURL());
+				try (InputStream inputStream = con.getInputStream();){
+					
+					Document doc = Jsoup.parse(inputStream, con.getContentEncoding(), con.getURL().toString());
 					return doc;
-
 				} catch (Exception e) {
 					System.out.println(e.getMessage());
-				} finally {
-					input.close();
 				}
+				
 				return null;
 			}
 		}));

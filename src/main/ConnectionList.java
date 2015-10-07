@@ -7,7 +7,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
- * Classe que gerencia a lista de conexoes usadas pela aplicação
+ * Thread-Safe list of connections that holds all the open and not used connections.
+ * Internally it uses a {@link Queue} to hold the connection and return the first open. 
  * 
  * @author johnny w. g. g.
  *
@@ -19,7 +20,6 @@ public class ConnectionList {
 
 	private ConnectionList() {
 		this.queue = new ArrayDeque<>();
-
 	}
 
 	public static ConnectionList getInstance() {
@@ -27,17 +27,12 @@ public class ConnectionList {
 	}
 
 	public synchronized void add(Future<URLConnection> connection) {
-
 		try {
 			while (isFull())
 				wait();
-
 			queue.add(connection);
-			
 		} catch (InterruptedException e) {
-
 		}
-
 		this.notifyAll();
 	}
 
@@ -57,22 +52,15 @@ public class ConnectionList {
 	 * @return
 	 */
 	public synchronized Future<URLConnection> getAsFuture() {
-
 		try {
-
 			while (isEmpty())
 				wait();
-
 			Future<URLConnection> future = queue.poll();
-
 			notifyAll();
-
 			return future;
-
 		} catch (InterruptedException e) {
 			return null;
 		}
-
 	}
 
 	/**

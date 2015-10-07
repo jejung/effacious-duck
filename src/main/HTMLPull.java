@@ -1,6 +1,5 @@
 package main;
 
-import java.io.IOException;
 import java.net.URLConnection;
 import java.util.concurrent.ExecutionException;
 
@@ -15,28 +14,19 @@ public class HTMLPull implements Runnable {
 	private HTMLList htmlList;
 
 	public HTMLPull(ConnectionList connectionList, HTMLList htmlList) {
-
 		this.connectionList = connectionList;
 		this.htmlList = htmlList;
 	}
 
 	@Override
 	public void run() {
-
 		while (true) {
-
-			URLConnection conn;
-
 			try {
-				
-				conn = connectionList.getAsFuture().get();
-				htmlList.add(conn.getInputStream(), conn.getContentEncoding(), conn.getURL().getPath());
-			
-			} catch (IOException | InterruptedException | ExecutionException e) {
+				URLConnection con = this.connectionList.getAsFuture().get();
+				htmlList.add(con);
+			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
-
 		}
-
 	}
 }

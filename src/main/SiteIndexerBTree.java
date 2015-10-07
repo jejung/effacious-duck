@@ -427,15 +427,12 @@ public class SiteIndexerBTree
 						
 						if (lUtf.equals(url))
 							return pos;
-						else
-						{
-							newPos = raf.length();
-							raf.seek(raf.getFilePointer() - Long.BYTES);
-							raf.writeLong(newPos);
-							raf.seek(raf.length());
-							raf.writeUTF(url);
-							raf.writeLong(-1L);
-						}
+						newPos = raf.length();
+						raf.seek(raf.getFilePointer() - Long.BYTES);
+						raf.writeLong(newPos);
+						raf.seek(raf.length());
+						raf.writeUTF(url);
+						raf.writeLong(-1L);
 					}
 				}
 			}

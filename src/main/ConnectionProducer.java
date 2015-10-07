@@ -5,13 +5,9 @@ package main;
 
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Queue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
 
 /**
  * @author Jean Jung
@@ -29,24 +25,17 @@ public class ConnectionProducer implements Runnable {
 
 	@Override
 	public void run() {
-
 		while (true) {
-			
 			//System.out.println("SIZEof urlList " + urlList.size());
-			
 			// System.out.println("ConnecionProducer");
 			connectionList.add(this.executor.submit(new ConnectionCreator(urlList.get())));
 			// connectionList.notifyAll();
-		
 		}
-
 	}
 
 	public ConnectionProducer(URLList urlList, ConnectionList connectionList) {
-
 		this.urlList = urlList;
 		this.connectionList = connectionList;
-
 		this.executor = Executors.newFixedThreadPool(MAX_CONNECTIONS);
 
 	}

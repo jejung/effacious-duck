@@ -5,24 +5,13 @@ package main;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Stack;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.print.Doc;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -31,7 +20,7 @@ import org.jsoup.select.Elements;
 /**
  * Class that handle extraction of links in web pages
  * 
- * @author jean
+ * @author Jean Jung
  * @author johnny w. g. g.
  */
 public class URLExtractor implements Runnable {
@@ -133,16 +122,21 @@ public class URLExtractor implements Runnable {
 
 	private void extract(Element el) {
 
-		// Element content = el.getElementById("content");
 		Elements links = el.getElementsByTag("a");
 		for (Element link : links) {
-
-			// System.out.println(link);
 			try {
-				urlList.add(new URL(link.attr("href")));
-				System.out.println("Mapped = " + mapped++);
+				String href = link.absUrl("href");
+				if (!(href.endsWith(".pdf") || 
+					  href.endsWith(".jpg") || 
+					  href.endsWith(".avi"))) {
+					urlList.add(new URL(href));
+//					System.out.println("Link found: " + href);
+					System.out.println("Mapped = " + mapped++);
+				} else {
+					System.out.println("Midia ignored: " + href);
+				}
 			} catch (MalformedURLException e) {
-				// System.err.println(e.getMessage());
+				 System.err.println(e.getMessage());
 			}
 		}
 
@@ -156,43 +150,28 @@ public class URLExtractor implements Runnable {
 		// futurePoolControler.start();
 
 		while (true) {
-
 			try {
-
 				synchronized (lock) {
-
 					while (docs.isEmpty()) {
-
 						lock.wait();
 					}
-
 					sem.acquire();
-
 					executor.submit(new Callable<Void>() {
 						@Override
 						public Void call() throws Exception {
 
 							try {
-
 								extract(docs.poll());
-
 								return null;
-
 							} finally {
 								sem.release();
-
 							}
 						}
-
 					});
-
 				}
-
 			} catch (InterruptedException e) {
 				break;
 			}
-
 		}
-
 	}
 }

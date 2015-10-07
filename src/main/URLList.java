@@ -1,10 +1,8 @@
 package main;
 
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.concurrent.Future;
 
 /**
  * Class that handle and URL queue to be consumed by Connection Producer.
@@ -22,7 +20,7 @@ public class URLList {
 	}
 	
 	private URLList() {
-		this.queue = new ArrayDeque<URL>();
+		this.queue = new ArrayDeque<>();
 	}
 
 	public static URLList getInstance() {
@@ -38,38 +36,26 @@ public class URLList {
 	}
 
 	public synchronized void add(URL url) {
-		//if (isFull()) return;
 		try {
-
 			while (isFull())
 				wait();
-
 			queue.add(url);
 			//System.err.println("ADDED " + url);
 			this.notifyAll();
-
 		} catch (InterruptedException e) {
 
 		}
-
 	}
 
 	public synchronized URL get() {
-
 		try {
-
 			while (isEmpty())
 				wait();
-
 			URL url = queue.poll();
-
 			notifyAll();
-
 			return url;
-
 		} catch (InterruptedException e) {
 			return null;
 		}
-
 	}
 }
