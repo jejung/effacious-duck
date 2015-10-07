@@ -1,50 +1,51 @@
 package main;
+
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLConnection;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
 /**
+ * @author johnny w. g. g.
  * @author Jean Jung
  */
 public class Main {
-	
-	/**
-	 * 
-	 */
+
+	static volatile ConnectionList connList = ConnectionList.getInstance();
+	static volatile URLList urlList = URLList.getInstance();
+	static volatile HTMLList htmlList = HTMLList.getInstance();
+
 	public Main() {
 	}
 
 	/**
 	 * @param args
-	 * @throws IOException  
+	 * @throws IOException
 	 */
-	public static void main(String[] args)
-	
-		throws IOException
-	{
-		SiteConnectionProducer producer = new SiteConnectionProducer();
-		URLExtractor extractor = new URLExtractor(producer);
-		try {
-		    producer.add(new URL("http://www.globo.com/"));
-		} catch (InterruptedException e) {
-		    // TODO Auto-generated catch block
-		    e.printStackTrace();
-		}
-		URLConnection connection = null;
-		while ((connection = producer.poll()) != null)
-		{
-			System.out.format("Lendo connexão: %s\n", connection.getURL());
-			Document doc = Jsoup.parse(connection.getInputStream(), connection.getContentEncoding(),connection.getURL().getPath());
-			extractor.collect(doc);
-		}
+	public static void main(String[] args) throws IOException {
+
+//		urlList.add(new URL("http://g1.globo.com"));
+//		urlList.add(new URL("http://www.tecmundo.com.br"));
+//		urlList.add(new URL("http://docs.oracle.com"));
+		urlList.add(new URL("https://en.wikipedia.org"));
 		
-//		View view = new View();
-//		view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		view.pack(); 
-//		view.setLocationRelativeTo(null);
-//		view.setVisible(true);
+		ConnectionProducer connProducer = new ConnectionProducer(urlList, connList);
+		HTMLPull htmlPull = new HTMLPull(connList, htmlList);
+		URLExtractor urlExtractor = new URLExtractor(urlList);
+		HTMLSpliterator htmlSplit = new HTMLSpliterator(htmlList, urlExtractor);
+
+		Thread t1 = new Thread(connProducer);
+		Thread t2 = new Thread(htmlPull);
+		Thread t3 = new Thread(urlExtractor);
+		Thread t4 = new Thread(htmlSplit);
+		
+		t3.setPriority(10);
+		
+		t1.setPriority(1);
+		t2.setPriority(1);
+		t4.setPriority(1);
+		
+		t1.start();
+		t2.start();
+		t3.start();
+		t4.start();
 	}
 }
