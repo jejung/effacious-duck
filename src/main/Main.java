@@ -22,10 +22,9 @@ public class Main {
 	 */
 	public static void main(String[] args) throws IOException {
 
-//		urlList.add(new URL("http://g1.globo.com"));
-//		urlList.add(new URL("http://www.tecmundo.com.br"));
-//		urlList.add(new URL("http://docs.oracle.com"));
-		urlList.add(new URL("https://en.wikipedia.org"));
+		urlList.add(new URL("http://g1.globo.com"));
+		urlList.add(new URL("http://www.tecmundo.com.br"));
+		urlList.add(new URL("http://docs.oracle.com"));
 		
 		ConnectionProducer connProducer = new ConnectionProducer(urlList, connList);
 		HTMLPull htmlPull = new HTMLPull(connList, htmlList);

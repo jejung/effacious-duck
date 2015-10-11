@@ -22,22 +22,25 @@ public class ConnectionProducer implements Runnable {
 
 	private URLList urlList;
 	private ConnectionList connectionList;
-
-	@Override
-	public void run() {
-
-		while (true) {
-
-			connectionList.add(this.executor.submit(new ConnectionCreator(urlList.get())));
-
-		}
-	}
-
+	private boolean alive;
+	
 	public ConnectionProducer(URLList urlList, ConnectionList connectionList) {
 		this.urlList = urlList;
 		this.connectionList = connectionList;
 		this.executor = Executors.newFixedThreadPool(MAX_CONNECTIONS);
+		this.alive = true;
+	}
 
+	@Override
+	public void run() {
+		this.produceForEver();
+	}
+	
+	private void produceForEver() {
+		
+		while (this.isAlive()) {
+			this.connectionList.add(this.executor.submit(new ConnectionCreator(urlList.get())));
+		}
 	}
 
 	private class ConnectionCreator implements Callable<URLConnection> {
@@ -52,6 +55,20 @@ public class ConnectionProducer implements Runnable {
 		public URLConnection call() throws Exception {
 			return uri.openConnection();
 		}
+	}
+	
+	/**
+	 * @return the alive
+	 */
+	public boolean isAlive() {
+		return this.alive;
+	}
+
+	/**
+	 * @param alive the alive to set
+	 */
+	public void setAlive(boolean alive) {
+		this.alive = alive;
 	}
 
 }
