@@ -35,7 +35,7 @@ public class ConnectionProducer implements Runnable {
 	
 	private void produceForever() {
 		while (isAlive()) {
-			connectionList.add(executor.submit(ConnectionCreator.create(urlList.poll())));
+			connectionList.add(executor.submit(ConnectionCreator.create(urlList.pop())));
 		}
 	}
 

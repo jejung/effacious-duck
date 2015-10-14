@@ -34,8 +34,9 @@ public class HTMLSpliterator implements Runnable {
 				doc = htmlList.getAsFuture().get();
 				// TODO fix in some way that don't need this if clause
 				// could be happen in some cases of timeout connection
-				if (doc != null)
+				if (doc != null) {
 					urlExtractor.addDocument(doc);
+				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}

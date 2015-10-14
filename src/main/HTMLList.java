@@ -24,7 +24,6 @@ public class HTMLList {
 
 	private ArrayDeque<Future<Document>> documents;
 
-	// TODO create an .ini file or store these values in a DB
 	private static final int MAX_DOCS = 40;
 
 	private ExecutorService executor;

@@ -37,21 +37,20 @@ public class URLExtractor implements Runnable {
 
 	private ExecutorService executor;
 
-	private volatile Semaphore sem = new Semaphore(MAX_EXTRACTORS);
+	private volatile Semaphore semaphore = new Semaphore(MAX_EXTRACTORS);
 	
 	private boolean alive;
 
 	public URLExtractor(URLQueue urlList) {
-		docs = new ArrayDeque<>();
+		this.docs = new ArrayDeque<>();
 		this.urlList = urlList;
-		executor = Executors.newFixedThreadPool(MAX_EXTRACTORS);
+		this.executor = Executors.newFixedThreadPool(MAX_EXTRACTORS);
 		this.alive = true;
 	}
 
 	public void addDocument(Document doc) {
 
 		synchronized (lock) {
-
 			while (docs.size() > MAX_DOCUMENTS) {
 				try {
 					lock.wait();
@@ -60,7 +59,9 @@ public class URLExtractor implements Runnable {
 					break;
 				}
 			}
+			
 			docs.add(doc);
+			
 			lock.notifyAll();
 		}
 	}
@@ -73,12 +74,11 @@ public class URLExtractor implements Runnable {
 
 		Elements links = el.getElementsByTag("a");
 		
-		for (Element link : links) {			
+		for (Element link : links) {
 			String href = link.absUrl("href");
 			if (!href.isEmpty()) {
 				try {
 					if (!(href.endsWith(".pdf") || href.endsWith(".jpg") || href.endsWith(".avi"))) {
-
 						// TODO create an machanism to configure permission of https
 						// pages
 						// could be used to remove https pages, this would be
@@ -86,8 +86,8 @@ public class URLExtractor implements Runnable {
 //						if (href.startsWith("https")) {
 //							href = href.replaceFirst("s", "");
 //						}
+						
 						urlList.add(new URL(href));
-
 					} else {
 						// TODO maybe store images on database
 						System.err.println("Midia ignored: " + href);
@@ -114,7 +114,7 @@ public class URLExtractor implements Runnable {
 					while (docs.isEmpty()) {
 						lock.wait();
 					}
-					sem.acquire();
+					semaphore.acquire();
 
 					executor.submit(new Callable<Void>() {
 						@Override
@@ -124,8 +124,8 @@ public class URLExtractor implements Runnable {
 								extract(docs.poll());
 								return null;
 							} finally {
-								sem.release();
-								//System.out.println("releasing sem: " + sem.availablePermits());
+								semaphore.release();
+								//System.out.println("releasing semaphore: " + sem.availablePermits());
 								lock.notifyAll();
 							}
 						}

@@ -1,8 +1,9 @@
 package main;
 
 import java.net.URL;
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Class that handle and URL queue to be consumed by Connection Producer.
@@ -12,10 +13,9 @@ import java.util.Queue;
  */
 public class URLQueue {
 
-	private Queue<URL> queue;
+	private Set<URL> queue;
 	private static URLQueue instance = new URLQueue();
 
-	// TODO create an .ini file or store these values in a DB
 	private static final int MAX_URLS = 100;
 
 	public int size() {
@@ -23,7 +23,7 @@ public class URLQueue {
 	}
 
 	private URLQueue() {
-		this.queue = new ArrayDeque<>();
+		this.queue = new LinkedHashSet<URL>();
 	}
 
 	public static URLQueue getInstance() {
@@ -51,19 +51,24 @@ public class URLQueue {
 		/*
 		 * while (isFull()) { wait(); }
 		 */
-		queue.add(url);
-		// System.err.println("ADDED " + url);
-
+		
+		if (queue.add(url)) {
+			System.out.println("URL enqueued: " + url);
+		}
+		
 		notifyAll();
 	}
 
-	synchronized public URL poll() {
+	synchronized public URL pop() {
 		try {
 			while (isEmpty()) {
 				wait();
 			}
 			
-			URL url = queue.poll();
+			Iterator<URL> iterator = queue.iterator();
+			URL url = iterator.next();
+			iterator.remove();
+			
 			notifyAll();
 			
 			return url;
