@@ -33,10 +33,10 @@ public class ConnectionProducer implements Runnable {
 
 	@Override
 	public void run() {
-		this.produceForEver();
+		this.produceForever();
 	}
 	
-	private void produceForEver() {
+	private void produceForever() {
 		
 		while (this.isAlive()) {
 			this.connectionList.add(this.executor.submit(new ConnectionCreator(urlList.get())));
