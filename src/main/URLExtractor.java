@@ -104,10 +104,10 @@ public class URLExtractor implements Runnable {
 
 	@Override
 	public void run() {
-		this.collectForEver();
+		this.collectForever();
 	}
 	
-	private void collectForEver(){
+	private void collectForever(){
 		while (this.isAlive()) {
 			try {
 				synchronized (lock) {
