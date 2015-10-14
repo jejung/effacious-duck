@@ -2,6 +2,8 @@ package main;
 
 import java.net.URLConnection;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jsoup.helper.HttpConnection;
 
@@ -36,7 +38,7 @@ public class HTMLPull implements Runnable {
 				URLConnection con = this.connectionList.getAsFuture().get();
 				htmlList.add(con);
 			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
+				Logger.getGlobal().log(Level.SEVERE, "Error producing connections", e);
 			}
 		}
 	}

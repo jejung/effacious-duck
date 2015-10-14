@@ -23,7 +23,7 @@ public class URLQueue {
 	}
 
 	private URLQueue() {
-		this.queue = new LinkedHashSet<URL>();
+		this.queue = new LinkedHashSet<>();
 	}
 
 	public static URLQueue getInstance() {

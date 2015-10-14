@@ -1,6 +1,8 @@
 package main;
 
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jsoup.nodes.Document;
 
@@ -31,14 +33,14 @@ public class HTMLSpliterator implements Runnable {
 		while (this.isAlive()) {
 			Document doc;
 			try {
-				doc = htmlList.getAsFuture().get();
+				doc = this.htmlList.getAsFuture().get();
 				// TODO fix in some way that don't need this if clause
 				// could be happen in some cases of timeout connection
 				if (doc != null) {
-					urlExtractor.addDocument(doc);
+					this.urlExtractor.addDocument(doc);
 				}
 			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
+				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
 			}
 		}
 	}

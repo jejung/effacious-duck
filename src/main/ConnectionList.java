@@ -5,6 +5,8 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Thread-Safe list of connections that holds all the open and not used
@@ -31,14 +33,13 @@ public class ConnectionList {
 
 	public synchronized void add(Future<URLConnection> connection) {
 		try {
-
-			while (isFull()) {
+			while (this.isFull()) {
 				wait();
 			}
-
 			queue.add(connection);
 		} catch (InterruptedException e) {
-		}
+			Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
+		} 
 		
 		notifyAll();
 	}
@@ -61,7 +62,7 @@ public class ConnectionList {
 	 */
 	public synchronized Future<URLConnection> getAsFuture() throws ExecutionException {
 		try {
-			while (isEmpty()) {
+			while (this.isEmpty()) {
 				wait();
 			}
 

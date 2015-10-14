@@ -10,6 +10,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -55,8 +57,7 @@ public class URLExtractor implements Runnable {
 				try {
 					lock.wait();
 				} catch (InterruptedException e) {
-					e.printStackTrace();
-					break;
+					Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
 				}
 			}
 			
