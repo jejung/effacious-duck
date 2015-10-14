@@ -9,12 +9,9 @@ import java.net.URL;
  */
 public class Main {
 
-	static volatile ConnectionList connList = ConnectionList.getInstance();
-	static volatile URLList urlList = URLList.getInstance();
+	static volatile ConnectionList connectionList = ConnectionList.getInstance();
+	static volatile URLQueue urlList = URLQueue.getInstance();
 	static volatile HTMLList htmlList = HTMLList.getInstance();
-
-	public Main() {
-	}
 
 	/**
 	 * @param args
@@ -26,25 +23,25 @@ public class Main {
 		urlList.add(new URL("http://www.tecmundo.com.br"));
 		urlList.add(new URL("http://docs.oracle.com"));
 		
-		ConnectionProducer connProducer = new ConnectionProducer(urlList, connList);
-		HTMLPull htmlPull = new HTMLPull(connList, htmlList);
+		ConnectionProducer connectionProducer = new ConnectionProducer(urlList, connectionList);
+		HTMLPull htmlPull = new HTMLPull(connectionList, htmlList);
 		URLExtractor urlExtractor = new URLExtractor(urlList);
-		HTMLSpliterator htmlSplit = new HTMLSpliterator(htmlList, urlExtractor);
+		HTMLSpliterator htmlSpliterator = new HTMLSpliterator(htmlList, urlExtractor);
 
-		Thread t1 = new Thread(connProducer);
-		Thread t2 = new Thread(htmlPull);
-		Thread t3 = new Thread(urlExtractor);
-		Thread t4 = new Thread(htmlSplit);
+		Thread connectionProducerThread = new Thread(connectionProducer);
+		Thread htmlPullThread = new Thread(htmlPull);
+		Thread urlExtractorThread = new Thread(urlExtractor);
+		Thread htmlSpliteratorThread = new Thread(htmlSpliterator);
 		
-		t3.setPriority(10);
+		urlExtractorThread.setPriority(Thread.MAX_PRIORITY);
 		
-		t1.setPriority(1);
-		t2.setPriority(1);
-		t4.setPriority(1);
+		connectionProducerThread.setPriority(Thread.MIN_PRIORITY);
+		htmlPullThread.setPriority(Thread.MIN_PRIORITY);
+		htmlSpliteratorThread.setPriority(Thread.MIN_PRIORITY);
 		
-		t1.start();
-		t2.start();
-		t3.start();
-		t4.start();
+		connectionProducerThread.start();
+		htmlPullThread.start();
+		urlExtractorThread.start();
+		htmlSpliteratorThread.start();
 	}
 }

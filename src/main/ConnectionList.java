@@ -19,7 +19,6 @@ public class ConnectionList {
 	private Queue<Future<URLConnection>> queue;
 	private static ConnectionList instance = new ConnectionList();
 
-	// TODO create an .ini file or store these values in a DB
 	private static final int MAX_CONNECTIONS = 40;
 
 	private ConnectionList() {
@@ -40,7 +39,8 @@ public class ConnectionList {
 			queue.add(connection);
 		} catch (InterruptedException e) {
 		}
-		this.notifyAll();
+		
+		notifyAll();
 	}
 
 	public synchronized boolean isFull() {

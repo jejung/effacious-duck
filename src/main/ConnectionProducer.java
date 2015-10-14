@@ -3,9 +3,6 @@
  */
 package main;
 
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,11 +17,11 @@ public class ConnectionProducer implements Runnable {
 
 	private ExecutorService executor;
 
-	private URLList urlList;
+	private URLQueue urlList;
 	private ConnectionList connectionList;
 	private boolean alive;
 	
-	public ConnectionProducer(URLList urlList, ConnectionList connectionList) {
+	public ConnectionProducer(URLQueue urlList, ConnectionList connectionList) {
 		this.urlList = urlList;
 		this.connectionList = connectionList;
 		this.executor = Executors.newFixedThreadPool(MAX_CONNECTIONS);
@@ -37,26 +34,11 @@ public class ConnectionProducer implements Runnable {
 	}
 	
 	private void produceForever() {
-		
-		while (this.isAlive()) {
-			this.connectionList.add(this.executor.submit(new ConnectionCreator(urlList.get())));
+		while (isAlive()) {
+			connectionList.add(executor.submit(ConnectionCreator.create(urlList.poll())));
 		}
 	}
 
-	private class ConnectionCreator implements Callable<URLConnection> {
-
-		private URL uri;
-
-		public ConnectionCreator(URL uri) {
-			this.uri = uri;
-		}
-
-		@Override
-		public URLConnection call() throws Exception {
-			return uri.openConnection();
-		}
-	}
-	
 	/**
 	 * @return the alive
 	 */

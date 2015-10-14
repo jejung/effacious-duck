@@ -27,7 +27,7 @@ public class URLExtractor implements Runnable {
 
 	private Object lock = new Object();
 
-	private URLList urlList;
+	private URLQueue urlList;
 
 	private static final int MAX_EXTRACTORS = 10;
 	
@@ -41,7 +41,7 @@ public class URLExtractor implements Runnable {
 	
 	private boolean alive;
 
-	public URLExtractor(URLList urlList) {
+	public URLExtractor(URLQueue urlList) {
 		docs = new ArrayDeque<>();
 		this.urlList = urlList;
 		executor = Executors.newFixedThreadPool(MAX_EXTRACTORS);
