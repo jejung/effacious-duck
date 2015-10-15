@@ -1,14 +1,13 @@
-package main;
+package br.com.effacious.dom;
 
-import java.io.InputStream;
 import java.net.URLConnection;
 import java.util.ArrayDeque;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 /**
@@ -24,7 +23,6 @@ public class HTMLList {
 
 	private ArrayDeque<Future<Document>> documents;
 
-	// TODO create an .ini file or store these values in a DB
 	private static final int MAX_DOCS = 40;
 
 	private ExecutorService executor;
@@ -46,7 +44,6 @@ public class HTMLList {
 				wait();
 
 			Future<Document> future = documents.poll();
-
 			notifyAll();
 
 			return future;
@@ -57,34 +54,23 @@ public class HTMLList {
 
 	}
 
-	public synchronized void add(URLConnection con) {
+	/**
+	 * 
+	 * @param connection
+	 */
+	public synchronized void add(URLConnection connection) {
 
-		while (isFull())
-
+		while (isFull()) {
 			try {
 				wait();
-			} catch (InterruptedException e1) {
-
+			} catch (InterruptedException e) {
+				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
 			}
+		}
 
-		documents.add(executor.submit(new Callable<Document>() {
-			@Override
-			public Document call() throws Exception {
-
-				try (InputStream inputStream = con.getInputStream();) {
-
-					Document doc = Jsoup.parse(inputStream, con.getContentEncoding(), con.getURL().toString());
-					return doc;
-				} catch (Exception e) {
-					System.out.println(e.getMessage());
-				}
-
-				return null;
-			}
-		}));
-
+		documents.add(executor.submit(new DocumentCreator(connection)));
+		
 		notifyAll();
-
 	}
 
 	public synchronized boolean isEmpty() {

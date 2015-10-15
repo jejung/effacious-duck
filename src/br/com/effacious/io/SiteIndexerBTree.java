@@ -1,7 +1,7 @@
 /**
  * 
  */
-package main;
+package br.com.effacious.io;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class SiteIndexerBTree {
 	public SiteIndexerBTree(int order, File indexFile, File dataFile) throws IOException {
 		this.order = order;
 		this.maxKeys = order * 2;
-		this.ioManager = new IOBlockManager(indexFile, dataFile, order, this.maxKeys);
+		this.ioManager = new IOBlockManager(indexFile, dataFile, this.maxKeys);
 		this.root = this.ioManager.read(IOBlockManager.HEADER_SIZE);
 	}
 
@@ -211,7 +211,7 @@ public class SiteIndexerBTree {
 		 * @param file
 		 * @param dataFile
 		 */
-		public IOBlockManager(File file, File dataFile, int order, int keyCount) {
+		public IOBlockManager(File file, File dataFile, int keyCount) {
 			super();
 			this.file = file;
 			this.dataFile = dataFile;
@@ -290,7 +290,7 @@ public class SiteIndexerBTree {
 			return n;
 		}
 
-		private Key readKey(ByteBuffer bb) throws IOException {
+		private Key readKey(ByteBuffer bb) {
 			Key key = new Key();
 			byte[] b = new byte[Key.WORD_BYTES];
 			bb.get(b);

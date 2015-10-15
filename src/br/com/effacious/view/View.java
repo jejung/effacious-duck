@@ -1,14 +1,15 @@
+package br.com.effacious.view;
 ///**
 // * 
 // */
-//package view;
+//package br.com.effacious.view;
 //
 //import java.awt.event.ActionEvent;
 //import java.awt.event.ActionListener;
 //
 //import javax.swing.JFrame;
 //
-//import main.IndexerStatusListener;
+//import br.com.effacious.main.IndexerStatusListener;
 //
 ///**
 // * @author Jean Jung
@@ -18,7 +19,7 @@
 //{
 //
 //	/* (non-Javadoc)
-//	 * @see main.IndexerStatusListener#statusChanged(java.lang.String)
+//	 * @see br.com.effacious.main.IndexerStatusListener#statusChanged(java.lang.String)
 //	 */
 //	@Override
 //	public void statusChanged(String newStatus) {
@@ -27,7 +28,7 @@
 //	}
 //
 //	/* (non-Javadoc)
-//	 * @see main.IndexerStatusListener#searchReturned(java.lang.String)
+//	 * @see br.com.effacious.main.IndexerStatusListener#searchReturned(java.lang.String)
 //	 */
 //	@Override
 //	public void searchReturned(String url) {
@@ -36,7 +37,7 @@
 //	}
 //
 //	/* (non-Javadoc)
-//	 * @see main.IndexerStatusListener#wordIndexed(java.lang.String, int)
+//	 * @see br.com.effacious.main.IndexerStatusListener#wordIndexed(java.lang.String, int)
 //	 */
 //	@Override
 //	public void wordIndexed(String word, int qtIndexada) {
@@ -45,7 +46,7 @@
 //	}
 //
 //	/* (non-Javadoc)
-//	 * @see main.IndexerStatusListener#indexListTerminated(long)
+//	 * @see br.com.effacious.main.IndexerStatusListener#indexListTerminated(long)
 //	 */
 //	@Override
 //	public void indexListTerminated(long totalTime) {
@@ -191,7 +192,7 @@
 ////	}
 ////
 ////	/* (non-Javadoc)
-////	 * @see main.IndexerStatusListener#statusChanged(java.lang.String)
+////	 * @see br.com.effacious.main.IndexerStatusListener#statusChanged(java.lang.String)
 ////	 */
 ////	@Override
 ////	public void statusChanged(String newStatus) {
@@ -199,7 +200,7 @@
 ////	}
 ////
 ////	/* (non-Javadoc)
-////	 * @see main.IndexerStatusListener#searchReturned(java.lang.String)
+////	 * @see br.com.effacious.main.IndexerStatusListener#searchReturned(java.lang.String)
 ////	 */
 ////	@Override
 ////	public void searchReturned(String url) 
@@ -207,7 +208,7 @@
 ////	}
 ////
 ////	/* (non-Javadoc)
-////	 * @see main.IndexerStatusListener#wordIndexed(java.lang.String)
+////	 * @see br.com.effacious.main.IndexerStatusListener#wordIndexed(java.lang.String)
 ////	 */
 ////	@Override
 ////	public void wordIndexed(String word, int qtIndexada) 
@@ -216,7 +217,7 @@
 ////	}
 ////
 ////	/* (non-Javadoc)
-////	 * @see main.IndexerStatusListener#indexListTerminated(long)
+////	 * @see br.com.effacious.main.IndexerStatusListener#indexListTerminated(long)
 ////	 */
 ////	@Override
 ////	public void indexListTerminated(long totalTime) 
