@@ -1,4 +1,4 @@
-# effacious-duck
+# efficacious-duck
 
 A component based Web Crawler API for scraping purposes.
 
