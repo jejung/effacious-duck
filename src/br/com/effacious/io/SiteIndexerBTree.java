@@ -1,7 +1,7 @@
 /**
  * 
  */
-package main;
+package br.com.effacious.io;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package main;
+package br.com.effacious.url;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,7 +20,6 @@ import org.jsoup.select.Elements;
 public class URLExtractor implements Callable<Void> {
 	
 	private Semaphore realeseWhenDone;
-	private Object notifyWhenDone;
 	private URLQueue queue;
 	private IntSupplier incrementCallback;
 	private Document document; 
@@ -28,9 +27,8 @@ public class URLExtractor implements Callable<Void> {
 	/**
 	 * 
 	 */
-	public URLExtractor(Semaphore realeseWhenDone, Object notifyWhenDone, URLQueue queue, IntSupplier incrementCallback, Document document) {
+	public URLExtractor(Semaphore realeseWhenDone, URLQueue queue, IntSupplier incrementCallback, Document document) {
 		this.realeseWhenDone = realeseWhenDone;
-		this.notifyWhenDone = notifyWhenDone;
 		this.queue = queue;
 		this.incrementCallback = incrementCallback;
 		this.document = document;
@@ -42,11 +40,10 @@ public class URLExtractor implements Callable<Void> {
 	@Override
 	public Void call() throws Exception {
 		try {
-//			System.out.println(this.document.getElementsByTag("title").get(0));
+			System.out.println(this.document.getElementsByTag("title").get(0));
 			this.extract(this.document);			
 		} finally {
 			this.realeseWhenDone.release();
-			this.notifyWhenDone.notifyAll();
 		}
 		return null;
 	}
@@ -55,29 +52,31 @@ public class URLExtractor implements Callable<Void> {
 
 		Elements links = el.getElementsByTag("a");
 		
-		for (Element link : links) {
-			String href = link.absUrl("href");
-			if (!href.isEmpty()) {
-				try {
-					if (!(href.endsWith(".pdf") || href.endsWith(".jpg") || href.endsWith(".avi"))) {
-						// TODO create an machanism to configure permission of https
-						// pages
-						// could be used to remove https pages, this would be
-						// configurable in the application
-//						if (href.startsWith("https")) {
-//							href = href.replaceFirst("s", "");
-//						}
-						
-						this.queue.add(new URL(href));
-					} else {
-						// TODO maybe store images on database
-						System.err.println("Midia ignored: " + href);
-					}
-				} catch (MalformedURLException e) {
-					System.err.println("Invalid URL: " + e.getMessage() + href);
+		links.parallelStream().forEach(
+			(link) -> {
+				String href = link.absUrl("href");
+				if (!href.isEmpty()) {
+					try {
+						if (!(href.endsWith(".pdf") || href.endsWith(".jpg") || href.endsWith(".avi"))) {
+							// TODO create an machanism to configure permission of https
+							// pages
+							// could be used to remove https pages, this would be
+							// configurable in the application
+//							if (href.startsWith("https")) {
+//								href = href.replaceFirst("s", "");
+//							}
+							
+							this.queue.add(new URL(href));
+						} else {
+							// TODO maybe store images on database
+							System.err.println("Midia ignored: " + href);
+						}
+					} catch (MalformedURLException e) {
+						System.err.println("Invalid URL: " + e.getMessage() + href);
+					}	
 				}	
-			}			
-		}
+				
+			});
 		System.out.println(this.incrementCallback.getAsInt() + " pages indexed so far.");
 		//Logger.getGlobal().log(Level.INFO, );
 	}

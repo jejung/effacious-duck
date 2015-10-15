@@ -1,12 +1,15 @@
 /**
  * 
  */
-package main;
+package br.com.effacious.url;
 
 import java.util.ArrayDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,8 +25,12 @@ public class URLConsumer implements Runnable {
 
 	volatile ArrayDeque<Document> docs;
 
-	private Object lock = new Object();
-
+	private Lock lock;
+	
+	private Condition isFull;
+	
+	private Condition isEmpty;
+	
 	private URLQueue queue;
 
 	private static final int MAX_EXTRACTORS = 10;
@@ -43,25 +50,24 @@ public class URLConsumer implements Runnable {
 		this.queue = urlList;
 		this.executor = Executors.newFixedThreadPool(MAX_EXTRACTORS);
 		this.alive = true;
+		this.lock = new ReentrantLock();
+		this.isFull = this.lock.newCondition();
+		this.isEmpty = this.lock.newCondition();
 	}
 
 	public void addDocument(Document doc) {
 		
-		// TODO: Trocar por ReentrantLock
-		
-		synchronized (lock) {
-			while (docs.size() > MAX_DOCUMENTS) {
-				try {
-					lock.wait();
-				} catch (InterruptedException e) {
-					Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
-				}
+		this.lock.lock();
+		while (docs.size() > MAX_DOCUMENTS) {
+			try {
+				this.isFull.await();
+			} catch (InterruptedException e) {
+				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
 			}
-			
-			docs.add(doc);
-			
-			lock.notifyAll();
 		}
+		docs.add(doc);
+		this.isEmpty.signalAll();
+		this.lock.unlock();
 	}
 
 	@Override
@@ -76,15 +82,18 @@ public class URLConsumer implements Runnable {
 	private void collectForever(){
 		while (this.isAlive()) {
 			try {
-				synchronized (lock) {
-					while (docs.isEmpty()) {
-						lock.wait();
-					}
-					semaphore.acquire();
-
-					executor.submit(new URLExtractor(this.semaphore, this.lock, this.queue, 
-							this::mapped, this.docs.poll()));
+				this.lock.lock();
+				
+				while (this.docs.isEmpty()) {
+					this.isEmpty.await();
 				}
+				
+				semaphore.acquire();
+				executor.submit(
+						new URLExtractor(this.semaphore, this.queue, 
+								this::mapped, this.docs.poll()));
+				this.isFull.signalAll();
+				this.lock.unlock();
 			} catch (InterruptedException e) {
 				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
 				break;

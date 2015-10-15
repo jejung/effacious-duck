@@ -1,4 +1,4 @@
-package main;
+package br.com.effacious.url;
 
 import java.net.URL;
 import java.util.Iterator;
@@ -58,11 +58,10 @@ public class URLQueue {
 			System.err.println("URL enqueued: " + url);
 			Logger.getGlobal().log(Level.INFO, "URL enqueued: " + url);
 		}
-		
 		notifyAll();
 	}
 
-	synchronized public URL pop() {
+	public synchronized URL pop() {
 		try {
 			while (isEmpty()) {
 				wait();

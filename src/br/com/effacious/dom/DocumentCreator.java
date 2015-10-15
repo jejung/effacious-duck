@@ -1,7 +1,7 @@
 /**
  * 
  */
-package main;
+package br.com.effacious.dom;
 
 import java.io.InputStream;
 import java.net.URLConnection;

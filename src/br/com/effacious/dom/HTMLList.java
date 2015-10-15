@@ -1,4 +1,4 @@
-package main;
+package br.com.effacious.dom;
 
 import java.net.URLConnection;
 import java.util.ArrayDeque;

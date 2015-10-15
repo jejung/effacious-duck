@@ -1,10 +1,12 @@
-package main;
+package br.com.effacious.dom;
 
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jsoup.nodes.Document;
+
+import br.com.effacious.url.URLConsumer;
 
 /**
  * Class that split an web page into tasks to send to anothers modules
