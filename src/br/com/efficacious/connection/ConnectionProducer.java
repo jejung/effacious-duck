@@ -1,12 +1,12 @@
 /**
  * 
  */
-package br.com.effacious.connection;
+package br.com.efficacious.connection;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import br.com.effacious.url.URLQueue;
+import br.com.efficacious.url.URLQueue;
 
 /**
  * @author Jean Jung

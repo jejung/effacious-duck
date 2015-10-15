@@ -1,15 +1,15 @@
-package br.com.effacious.view;
+package br.com.efficacious.view;
 ///**
 // * 
 // */
-//package br.com.effacious.view;
+//package br.com.efficacious.view;
 //
 //import java.awt.event.ActionEvent;
 //import java.awt.event.ActionListener;
 //
 //import javax.swing.JFrame;
 //
-//import br.com.effacious.main.IndexerStatusListener;
+//import br.com.efficacious.main.IndexerStatusListener;
 //
 ///**
 // * @author Jean Jung
@@ -19,7 +19,7 @@ package br.com.effacious.view;
 //{
 //
 //	/* (non-Javadoc)
-//	 * @see br.com.effacious.main.IndexerStatusListener#statusChanged(java.lang.String)
+//	 * @see br.com.efficacious.main.IndexerStatusListener#statusChanged(java.lang.String)
 //	 */
 //	@Override
 //	public void statusChanged(String newStatus) {
@@ -28,7 +28,7 @@ package br.com.effacious.view;
 //	}
 //
 //	/* (non-Javadoc)
-//	 * @see br.com.effacious.main.IndexerStatusListener#searchReturned(java.lang.String)
+//	 * @see br.com.efficacious.main.IndexerStatusListener#searchReturned(java.lang.String)
 //	 */
 //	@Override
 //	public void searchReturned(String url) {
@@ -37,7 +37,7 @@ package br.com.effacious.view;
 //	}
 //
 //	/* (non-Javadoc)
-//	 * @see br.com.effacious.main.IndexerStatusListener#wordIndexed(java.lang.String, int)
+//	 * @see br.com.efficacious.main.IndexerStatusListener#wordIndexed(java.lang.String, int)
 //	 */
 //	@Override
 //	public void wordIndexed(String word, int qtIndexada) {
@@ -46,7 +46,7 @@ package br.com.effacious.view;
 //	}
 //
 //	/* (non-Javadoc)
-//	 * @see br.com.effacious.main.IndexerStatusListener#indexListTerminated(long)
+//	 * @see br.com.efficacious.main.IndexerStatusListener#indexListTerminated(long)
 //	 */
 //	@Override
 //	public void indexListTerminated(long totalTime) {
@@ -192,7 +192,7 @@ package br.com.effacious.view;
 ////	}
 ////
 ////	/* (non-Javadoc)
-////	 * @see br.com.effacious.main.IndexerStatusListener#statusChanged(java.lang.String)
+////	 * @see br.com.efficacious.main.IndexerStatusListener#statusChanged(java.lang.String)
 ////	 */
 ////	@Override
 ////	public void statusChanged(String newStatus) {
@@ -200,7 +200,7 @@ package br.com.effacious.view;
 ////	}
 ////
 ////	/* (non-Javadoc)
-////	 * @see br.com.effacious.main.IndexerStatusListener#searchReturned(java.lang.String)
+////	 * @see br.com.efficacious.main.IndexerStatusListener#searchReturned(java.lang.String)
 ////	 */
 ////	@Override
 ////	public void searchReturned(String url) 
@@ -208,7 +208,7 @@ package br.com.effacious.view;
 ////	}
 ////
 ////	/* (non-Javadoc)
-////	 * @see br.com.effacious.main.IndexerStatusListener#wordIndexed(java.lang.String)
+////	 * @see br.com.efficacious.main.IndexerStatusListener#wordIndexed(java.lang.String)
 ////	 */
 ////	@Override
 ////	public void wordIndexed(String word, int qtIndexada) 
@@ -217,7 +217,7 @@ package br.com.effacious.view;
 ////	}
 ////
 ////	/* (non-Javadoc)
-////	 * @see br.com.effacious.main.IndexerStatusListener#indexListTerminated(long)
+////	 * @see br.com.efficacious.main.IndexerStatusListener#indexListTerminated(long)
 ////	 */
 ////	@Override
 ////	public void indexListTerminated(long totalTime) 

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package br.com.effacious.url;
+package br.com.efficacious.url;
 
 import java.util.ArrayDeque;
 import java.util.concurrent.ExecutorService;

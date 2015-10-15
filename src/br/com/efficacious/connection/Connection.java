@@ -1,4 +1,4 @@
-package br.com.effacious.connection;
+package br.com.efficacious.connection;
 
 import java.net.URL;
 import java.net.URLConnection;

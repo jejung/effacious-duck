@@ -1,4 +1,4 @@
-package br.com.effacious.url;
+package br.com.efficacious.url;
 
 import java.net.URL;
 import java.util.Iterator;

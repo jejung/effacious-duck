@@ -1,4 +1,4 @@
-package br.com.effacious.dom;
+package br.com.efficacious.dom;
 
 import java.net.URLConnection;
 import java.util.concurrent.ExecutionException;
@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 import org.jsoup.helper.HttpConnection;
 
-import br.com.effacious.connection.ConnectionList;
+import br.com.efficacious.connection.ConnectionList;
 
 /**
  * Pull connections from a {@link ConnectionList} and serve the {@link HTMLList} with a open {@link HttpConnection} 

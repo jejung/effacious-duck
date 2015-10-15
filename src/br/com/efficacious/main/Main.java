@@ -1,17 +1,15 @@
-package br.com.effacious.main;
+package br.com.efficacious.main;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import br.com.effacious.connection.ConnectionList;
-import br.com.effacious.connection.ConnectionProducer;
-import br.com.effacious.dom.HTMLList;
-import br.com.effacious.dom.HTMLPull;
-import br.com.effacious.dom.HTMLSpliterator;
-import br.com.effacious.io.FileBTree;
-import br.com.effacious.url.URLConsumer;
-import br.com.effacious.url.URLQueue;
+import br.com.efficacious.connection.ConnectionList;
+import br.com.efficacious.connection.ConnectionProducer;
+import br.com.efficacious.dom.HTMLList;
+import br.com.efficacious.dom.HTMLPull;
+import br.com.efficacious.dom.HTMLSpliterator;
+import br.com.efficacious.url.URLConsumer;
+import br.com.efficacious.url.URLQueue;
 
 /**
  * @author johnny w. g. g.
@@ -29,31 +27,7 @@ public class Main {
 	 */
 	public static void main(String[] args) throws IOException {
 		
-		FileBTree btree = new FileBTree(2, new File("Data.bin"));
-		btree.insert("hola");
-		btree.insert("abola");
-		btree.insert("maestro");
-		btree.insert("morango");
-		btree.insert("abacaxi");
-		btree.insert("cachecol");
-		btree.insert("abelha");
-		btree.insert("mamangava");
-		btree.insert("bilbo");
-		btree.insert("manganes");
-		btree.insert("besouto");
-		btree.insert("banco");
-		btree.insert("navio");
-		btree.insert("lagoa");
-		btree.insert("lago");
-		btree.insert("camarão");
-		btree.insert("bagre");
-		btree.insert("notificacao");
-		btree.insert("limao");
-		btree.insert("medalha");
-		btree.insert("pictografico");
-		btree.print();
-
-		/* urlList.add(new URL("http://www.furb.br/web/10/portugues"));
+		urlList.add(new URL("http://www.furb.br/web/10/portugues"));
 		urlList.add(new URL("http://g1.globo.com"));
 		urlList.add(new URL("http://www.tecmundo.com.br"));
 		urlList.add(new URL("http://docs.oracle.com"));
@@ -77,6 +51,6 @@ public class Main {
 		connectionProducerThread.start();
 		htmlPullThread.start();
 		urlExtractorThread.start();
-		htmlSpliteratorThread.start();*/
+		htmlSpliteratorThread.start();
 	}
 }

@@ -1,4 +1,4 @@
-package br.com.effacious.connection;
+package br.com.efficacious.connection;
 
 import java.net.URLConnection;
 import java.util.ArrayDeque;
