@@ -15,10 +15,10 @@ import org.jsoup.nodes.Document;
 public class HTMLSpliterator implements Runnable {
 
 	private HTMLList htmlList;
-	private URLExtractor urlExtractor;
+	private URLConsumer urlExtractor;
 	private boolean alive;
 
-	public HTMLSpliterator(HTMLList htmlList, URLExtractor urlExtractor) {
+	public HTMLSpliterator(HTMLList htmlList, URLConsumer urlExtractor) {
 		this.htmlList = htmlList;
 		this.urlExtractor = urlExtractor;
 		this.setAlive(true);

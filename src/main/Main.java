@@ -19,13 +19,14 @@ public class Main {
 	 */
 	public static void main(String[] args) throws IOException {
 
-		urlList.add(new URL("http://g1.globo.com"));
-		urlList.add(new URL("http://www.tecmundo.com.br"));
-		urlList.add(new URL("http://docs.oracle.com"));
+		urlList.add(new URL("http://www.furb.br/web/10/portugues"));
+//		urlList.add(new URL("http://g1.globo.com"));
+//		urlList.add(new URL("http://www.tecmundo.com.br"));
+//		urlList.add(new URL("http://docs.oracle.com"));
 		
 		ConnectionProducer connectionProducer = new ConnectionProducer(urlList, connectionList);
 		HTMLPull htmlPull = new HTMLPull(connectionList, htmlList);
-		URLExtractor urlExtractor = new URLExtractor(urlList);
+		URLConsumer urlExtractor = new URLConsumer(urlList);
 		HTMLSpliterator htmlSpliterator = new HTMLSpliterator(htmlList, urlExtractor);
 
 		Thread connectionProducerThread = new Thread(connectionProducer);

@@ -4,6 +4,8 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class that handle and URL queue to be consumed by Connection Producer.
@@ -53,7 +55,8 @@ public class URLQueue {
 		 */
 		
 		if (queue.add(url)) {
-			System.out.println("URL enqueued: " + url);
+			System.err.println("URL enqueued: " + url);
+			Logger.getGlobal().log(Level.INFO, "URL enqueued: " + url);
 		}
 		
 		notifyAll();

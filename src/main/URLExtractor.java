@@ -5,70 +5,50 @@ package main;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayDeque;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.function.IntSupplier;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 /**
- * Class that handle extraction of links in web pages
- * 
- * @author Jean Jung
- * @author johnny w. g. g.
+ * @author jean
+ *
  */
-public class URLExtractor implements Runnable {
-
-	volatile ArrayDeque<Document> docs;
-
-	private Object lock = new Object();
-
-	private URLQueue urlList;
-
-	private static final int MAX_EXTRACTORS = 10;
+public class URLExtractor implements Callable<Void> {
 	
-	private static final int MAX_DOCUMENTS = 300;
-
-	private volatile int mapped = 0;
-
-	private ExecutorService executor;
-
-	private volatile Semaphore semaphore = new Semaphore(MAX_EXTRACTORS);
+	private Semaphore realeseWhenDone;
+	private Object notifyWhenDone;
+	private URLQueue queue;
+	private IntSupplier incrementCallback;
+	private Document document; 
 	
-	private boolean alive;
-
-	public URLExtractor(URLQueue urlList) {
-		this.docs = new ArrayDeque<>();
-		this.urlList = urlList;
-		this.executor = Executors.newFixedThreadPool(MAX_EXTRACTORS);
-		this.alive = true;
+	/**
+	 * 
+	 */
+	public URLExtractor(Semaphore realeseWhenDone, Object notifyWhenDone, URLQueue queue, IntSupplier incrementCallback, Document document) {
+		this.realeseWhenDone = realeseWhenDone;
+		this.notifyWhenDone = notifyWhenDone;
+		this.queue = queue;
+		this.incrementCallback = incrementCallback;
+		this.document = document;
 	}
 
-	public void addDocument(Document doc) {
-
-		synchronized (lock) {
-			while (docs.size() > MAX_DOCUMENTS) {
-				try {
-					lock.wait();
-				} catch (InterruptedException e) {
-					Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
-				}
-			}
-			
-			docs.add(doc);
-			
-			lock.notifyAll();
+	/**
+	 * {@inheritDoc Callable#call()}
+	 */
+	@Override
+	public Void call() throws Exception {
+		try {
+//			System.out.println(this.document.getElementsByTag("title").get(0));
+			this.extract(this.document);			
+		} finally {
+			this.realeseWhenDone.release();
+			this.notifyWhenDone.notifyAll();
 		}
-	}
-	
-	private synchronized int mapped() {
-		return ++mapped;
+		return null;
 	}
 	
 	private void extract(Element el) {
@@ -88,7 +68,7 @@ public class URLExtractor implements Runnable {
 //							href = href.replaceFirst("s", "");
 //						}
 						
-						urlList.add(new URL(href));
+						this.queue.add(new URL(href));
 					} else {
 						// TODO maybe store images on database
 						System.err.println("Midia ignored: " + href);
@@ -98,58 +78,8 @@ public class URLExtractor implements Runnable {
 				}	
 			}			
 		}
-
-		System.out.println(mapped() + " pages indexed so far.");
-
+		System.out.println(this.incrementCallback.getAsInt() + " pages indexed so far.");
+		//Logger.getGlobal().log(Level.INFO, );
 	}
 
-	@Override
-	public void run() {
-		this.collectForever();
-	}
-	
-	private void collectForever(){
-		while (this.isAlive()) {
-			try {
-				synchronized (lock) {
-					while (docs.isEmpty()) {
-						lock.wait();
-					}
-					semaphore.acquire();
-
-					executor.submit(new Callable<Void>() {
-						@Override
-						public Void call() throws Exception {
-
-							try {
-								extract(docs.poll());
-								return null;
-							} finally {
-								semaphore.release();
-								//System.out.println("releasing semaphore: " + sem.availablePermits());
-								lock.notifyAll();
-							}
-						}
-					});
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				break;
-			}
-		}
-	}
-
-	/**
-	 * @return the alive
-	 */
-	public boolean isAlive() {
-		return alive;
-	}
-
-	/**
-	 * @param alive the alive to set
-	 */
-	public void setAlive(boolean alive) {
-		this.alive = alive;
-	}
 }
