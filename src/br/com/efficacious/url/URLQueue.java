@@ -1,5 +1,6 @@
 package br.com.efficacious.url;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -7,6 +8,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import br.com.efficacious.dom.URLDocument;
 
 /**
  * Class that handle and URL queue to be consumed by Connection Producer.
@@ -50,7 +53,7 @@ public class URLQueue {
 		return queue.size() > MAX_URLS;
 	}
 
-	public void add(URL url) {
+	public void add(URL url, String from) {
 
 		writeLock.lock();
 		try {
@@ -70,7 +73,13 @@ public class URLQueue {
 			 */
 
 			if (queue.add(url)) {
-				Logger.getGlobal().log(Level.INFO, "URL enqueued: " + url);
+				// Logger.getGlobal().log(Level.INFO, "URL enqueued: " + url);
+			}
+
+			if (from != null && !getHostName(from).equals(url.getHost())) {
+
+				DomainRepository.getInstance().addDomain(url.getHost());
+
 			}
 
 			synchronized (isEmpty) {
@@ -81,6 +90,25 @@ public class URLQueue {
 			writeLock.unlock();
 		}
 
+	}
+
+	private String getHostName(String urlInput) {
+		urlInput = urlInput.toLowerCase();
+		String hostName = urlInput;
+		if (!urlInput.equals("")) {
+			if (urlInput.startsWith("http") || urlInput.startsWith("https")) {
+				try {
+					URL netUrl = new URL(urlInput);
+					String host = netUrl.getHost();
+					hostName = host;
+				} catch (MalformedURLException e) {
+					hostName = urlInput;
+				}
+			}
+			return hostName;
+		} else {
+			return "";
+		}
 	}
 
 	public URL pop() throws InterruptedException {

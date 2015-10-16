@@ -16,6 +16,9 @@ public class Connection implements Callable<URLConnection> {
 	@Override
 	public URLConnection call() throws Exception {
 		
+		// waits for the proxy configuration completes
+		NetConfig.instance().getLatch().await();
+		
 		if (NetConfig.instance().getProxy() == null)
 			return url.openConnection();
 		else

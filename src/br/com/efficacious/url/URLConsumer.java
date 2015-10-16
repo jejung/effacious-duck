@@ -30,26 +30,26 @@ public class URLConsumer implements Runnable {
 	volatile ArrayDeque<URLDocument> docs;
 
 	private static final int MAX_EXTRACTORS = 10;
-	
+
 	private static final int MAX_DOCUMENTS = 300;
-	
+
 	private static final int MAX_INDEXERS = 10;
-	
+
 	private Lock lock;
 	private Condition full;
 	private Condition empty;
 	private URLQueue queue;
-	
+
 	private volatile int mapped = 0;
 
 	private ExecutorService extractorExecutor;
-	
+
 	private ExecutorService indexerExecutor;
 
 	private volatile Semaphore extractorsSemaphore = new Semaphore(MAX_EXTRACTORS);
-	
+
 	private Semaphore indexersSemaphore = new Semaphore(MAX_INDEXERS);
-	
+
 	private boolean alive;
 
 	public URLConsumer(URLQueue urlList) {
@@ -65,7 +65,7 @@ public class URLConsumer implements Runnable {
 
 	public void addDocument(URLDocument doc) {
 		this.lock.lock();
-		
+
 		while (docs.size() > MAX_DOCUMENTS) {
 			try {
 				full.await();
@@ -73,7 +73,7 @@ public class URLConsumer implements Runnable {
 				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
 			}
 		}
-		
+
 		docs.add(doc);
 		empty.signalAll();
 		lock.unlock();
@@ -83,30 +83,28 @@ public class URLConsumer implements Runnable {
 	public void run() {
 		collectForever();
 	}
-	
+
 	private synchronized int mapped() {
 		return ++mapped;
 	}
-	
+
 	private void collectForever() {
 		while (isAlive()) {
 			lock.lock();
 			try {
-				
+
 				while (docs.isEmpty()) {
 					empty.await();
 				}
+
 				extractorsSemaphore.acquire();
 				URLDocument document = this.docs.poll();
-				
-				extractorExecutor.submit(
-						new URLExtractor(this.extractorsSemaphore, this.queue, 
-								this::mapped, document.getDocument()));
-				
+
+				extractorExecutor.submit(new URLExtractor(this.extractorsSemaphore, this.queue, this::mapped, document.getDocument()));
+
 				indexersSemaphore.acquire();
-				
 				indexerExecutor.submit(new URLIndexer(this.indexersSemaphore, document));
-				
+
 				full.signalAll();
 			} catch (InterruptedException e) {
 				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
@@ -125,7 +123,8 @@ public class URLConsumer implements Runnable {
 	}
 
 	/**
-	 * @param alive the alive to set
+	 * @param alive
+	 *            the alive to set
 	 */
 	public void setAlive(boolean alive) {
 		this.alive = alive;

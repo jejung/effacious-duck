@@ -4,6 +4,7 @@
 package br.com.efficacious.config;
 
 import java.net.Proxy;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author jean
@@ -15,8 +16,14 @@ public class NetConfig {
 	
 	private Proxy proxy;
 	
+	private CountDownLatch latch = new CountDownLatch(1);
+	
 	private NetConfig() {
 		
+	}
+	
+	public CountDownLatch getLatch() {
+		return latch;
 	}
 	
 	/**

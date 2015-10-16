@@ -39,7 +39,7 @@ public class DocumentCreator implements Callable<URLDocument> {
 			URLDocument urlDocument = new URLDocument(this.connection.getURL(), document);
 			return urlDocument;
 		} catch (Exception e) {
-			Logger.getGlobal().log(Level.SEVERE, "Error parsing HTML", e);
+			//Logger.getGlobal().log(Level.SEVERE, "Error parsing HTML", e);
 		}
 		return null;
 	}

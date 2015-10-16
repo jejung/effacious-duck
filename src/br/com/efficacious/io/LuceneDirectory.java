@@ -29,11 +29,7 @@ public class LuceneDirectory {
 			}
 		}
 		
-		latch.countDown();
 	}
-	
-	
-	
 	
 	public static CountDownLatch getLatch() {
 		return latch;
