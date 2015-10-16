@@ -40,8 +40,8 @@ public class URLExtractor implements Callable<Void> {
 	@Override
 	public Void call() throws Exception {
 		try {
-			System.out.println(this.document.getElementsByTag("title").get(0));
-			this.extract(this.document);			
+			System.out.println("Processing page with title: " + document.getElementsByTag("title").get(0).text().trim());
+			this.extract(document);			
 		} finally {
 			this.realeseWhenDone.release();
 		}

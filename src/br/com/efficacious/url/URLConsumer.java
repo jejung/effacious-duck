@@ -29,20 +29,17 @@ public class URLConsumer implements Runnable {
 
 	volatile ArrayDeque<URLDocument> docs;
 
-	private Lock lock;
-	
-	private Condition isFull;
-	
-	private Condition isEmpty;
-	
-	private URLQueue queue;
-
 	private static final int MAX_EXTRACTORS = 10;
 	
 	private static final int MAX_DOCUMENTS = 300;
 	
 	private static final int MAX_INDEXERS = 10;
-
+	
+	private Lock lock;
+	private Condition full;
+	private Condition empty;
+	private URLQueue queue;
+	
 	private volatile int mapped = 0;
 
 	private ExecutorService extractorExecutor;
@@ -62,41 +59,42 @@ public class URLConsumer implements Runnable {
 		this.indexerExecutor = Executors.newWorkStealingPool(MAX_INDEXERS);
 		this.alive = true;
 		this.lock = new ReentrantLock();
-		this.isFull = this.lock.newCondition();
-		this.isEmpty = this.lock.newCondition();
+		this.full = this.lock.newCondition();
+		this.empty = this.lock.newCondition();
 	}
 
 	public void addDocument(URLDocument doc) {
-		
 		this.lock.lock();
+		
 		while (docs.size() > MAX_DOCUMENTS) {
 			try {
-				this.isFull.await();
+				full.await();
 			} catch (InterruptedException e) {
 				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
 			}
 		}
+		
 		docs.add(doc);
-		this.isEmpty.signalAll();
-		this.lock.unlock();
+		empty.signalAll();
+		lock.unlock();
 	}
 
 	@Override
 	public void run() {
-		this.collectForever();
+		collectForever();
 	}
 	
 	private synchronized int mapped() {
-		return ++this.mapped;
+		return ++mapped;
 	}
 	
-	private void collectForever(){
-		while (this.isAlive()) {
+	private void collectForever() {
+		while (isAlive()) {
+			lock.lock();
 			try {
-				this.lock.lock();
 				
-				while (this.docs.isEmpty()) {
-					this.isEmpty.await();
+				while (docs.isEmpty()) {
+					empty.await();
 				}
 				extractorsSemaphore.acquire();
 				URLDocument document = this.docs.poll();
@@ -109,11 +107,12 @@ public class URLConsumer implements Runnable {
 				
 				indexerExecutor.submit(new URLIndexer(this.indexersSemaphore, document));
 				
-				this.isFull.signalAll();
-				this.lock.unlock();
+				full.signalAll();
 			} catch (InterruptedException e) {
 				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
 				break;
+			} finally {
+				lock.unlock();
 			}
 		}
 	}
