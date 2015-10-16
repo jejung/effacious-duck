@@ -1,9 +1,10 @@
 package br.com.effacious.url;
 
 import java.net.URL;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,17 +16,20 @@ import java.util.logging.Logger;
  */
 public class URLQueue {
 
-	private Set<URL> queue;
-	private static URLQueue instance = new URLQueue();
-
 	private static final int MAX_URLS = 100;
+	
+	private static URLQueue instance = new URLQueue();
+	
+	private Queue<URL> queue;
+	private ReadWriteLock lock;
 
 	public int size() {
 		return queue.size();
 	}
 
 	private URLQueue() {
-		this.queue = new LinkedHashSet<>();
+		this.queue = new ArrayDeque<URL>();
+		this.lock = new ReentrantReadWriteLock();
 	}
 
 	public static URLQueue getInstance() {
@@ -61,21 +65,21 @@ public class URLQueue {
 		notifyAll();
 	}
 
-	public synchronized URL pop() {
+	public synchronized URL pop() throws InterruptedException {
+		while (isEmpty()) {
+			wait();
+		}
+		
+		lock.readLock().lock();
+		
 		try {
-			while (isEmpty()) {
-				wait();
-			}
-			
-			Iterator<URL> iterator = queue.iterator();
-			URL url = iterator.next();
-			iterator.remove();
+			URL url = queue.poll();
 			
 			notifyAll();
 			
 			return url;
-		} catch (InterruptedException e) {
-			return null;
+		} finally {
+			lock.readLock().unlock();
 		}
 	}
 }
