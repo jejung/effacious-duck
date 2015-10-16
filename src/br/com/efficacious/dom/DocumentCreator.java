@@ -16,7 +16,7 @@ import org.jsoup.nodes.Document;
  * @author Jean Jung
  *
  */
-public class DocumentCreator implements Callable<Document> {
+public class DocumentCreator implements Callable<URLDocument> {
 	
 	private URLConnection connection;
 
@@ -31,15 +31,16 @@ public class DocumentCreator implements Callable<Document> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Document call() throws Exception {
+	public URLDocument call() throws Exception {
 		
 		try (InputStream inputStream = this.connection.getInputStream();) {
-			Document doc = Jsoup.parse(inputStream, this.connection.getContentEncoding(), this.connection.getURL().toString());
-			return doc;
+			
+			Document document = Jsoup.parse(inputStream, this.connection.getContentEncoding(), this.connection.getURL().toString());
+			URLDocument urlDocument = new URLDocument(this.connection.getURL(), document);
+			return urlDocument;
 		} catch (Exception e) {
 			Logger.getGlobal().log(Level.SEVERE, "Error parsing HTML", e);
 		}
-
 		return null;
 	}
 

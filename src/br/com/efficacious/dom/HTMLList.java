@@ -8,8 +8,6 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jsoup.nodes.Document;
-
 /**
  * 
  * @author Jean Jung
@@ -21,7 +19,7 @@ public class HTMLList {
 
 	private static HTMLList instance = new HTMLList();
 
-	private ArrayDeque<Future<Document>> documents;
+	private ArrayDeque<Future<URLDocument>> documents;
 
 	private static final int MAX_DOCS = 40;
 
@@ -36,14 +34,14 @@ public class HTMLList {
 		return instance;
 	}
 
-	public synchronized Future<Document> getAsFuture() {
+	public synchronized Future<URLDocument> getAsFuture() {
 
 		try {
 
 			while (isEmpty())
 				wait();
 
-			Future<Document> future = documents.poll();
+			Future<URLDocument> future = documents.poll();
 			notifyAll();
 
 			return future;
@@ -69,7 +67,6 @@ public class HTMLList {
 		}
 
 		documents.add(executor.submit(new DocumentCreator(connection)));
-		
 		notifyAll();
 	}
 

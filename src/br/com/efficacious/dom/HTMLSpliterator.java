@@ -4,8 +4,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jsoup.nodes.Document;
-
 import br.com.efficacious.url.URLConsumer;
 
 /**
@@ -33,13 +31,13 @@ public class HTMLSpliterator implements Runnable {
 	
 	private void splitForEver() {
 		while (this.isAlive()) {
-			Document doc;
+			URLDocument urlDocument;
 			try {
-				doc = this.htmlList.getAsFuture().get();
+				urlDocument = this.htmlList.getAsFuture().get();
 				// TODO fix in some way that don't need this if clause
 				// could be happen in some cases of timeout connection
-				if (doc != null) {
-					this.urlExtractor.addDocument(doc);
+				if (urlDocument != null) {
+					this.urlExtractor.addDocument(urlDocument);
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);

@@ -15,6 +15,10 @@ import java.util.logging.Logger;
 
 import org.jsoup.nodes.Document;
 
+import br.com.efficacious.dom.URLDocument;
+import br.com.efficacious.io.URLIndexBuilder;
+import br.com.efficacious.io.URLIndexer;
+
 /**
  * Class that handle extraction of links in web pages
  * 
@@ -23,7 +27,7 @@ import org.jsoup.nodes.Document;
  */
 public class URLConsumer implements Runnable {
 
-	volatile ArrayDeque<Document> docs;
+	volatile ArrayDeque<URLDocument> docs;
 
 	private Lock lock;
 	
@@ -36,26 +40,33 @@ public class URLConsumer implements Runnable {
 	private static final int MAX_EXTRACTORS = 10;
 	
 	private static final int MAX_DOCUMENTS = 300;
+	
+	private static final int MAX_INDEXERS = 10;
 
 	private volatile int mapped = 0;
 
-	private ExecutorService executor;
+	private ExecutorService extractorExecutor;
+	
+	private ExecutorService indexerExecutor;
 
-	private volatile Semaphore semaphore = new Semaphore(MAX_EXTRACTORS);
+	private volatile Semaphore extractorsSemaphore = new Semaphore(MAX_EXTRACTORS);
+	
+	private Semaphore indexersSemaphore = new Semaphore(MAX_INDEXERS);
 	
 	private boolean alive;
 
 	public URLConsumer(URLQueue urlList) {
 		this.docs = new ArrayDeque<>();
 		this.queue = urlList;
-		this.executor = Executors.newFixedThreadPool(MAX_EXTRACTORS);
+		this.extractorExecutor = Executors.newFixedThreadPool(MAX_EXTRACTORS);
+		this.indexerExecutor = Executors.newWorkStealingPool(MAX_INDEXERS);
 		this.alive = true;
 		this.lock = new ReentrantLock();
 		this.isFull = this.lock.newCondition();
 		this.isEmpty = this.lock.newCondition();
 	}
 
-	public void addDocument(Document doc) {
+	public void addDocument(URLDocument doc) {
 		
 		this.lock.lock();
 		while (docs.size() > MAX_DOCUMENTS) {
@@ -87,11 +98,17 @@ public class URLConsumer implements Runnable {
 				while (this.docs.isEmpty()) {
 					this.isEmpty.await();
 				}
+				extractorsSemaphore.acquire();
+				URLDocument document = this.docs.poll();
 				
-				semaphore.acquire();
-				executor.submit(
-						new URLExtractor(this.semaphore, this.queue, 
-								this::mapped, this.docs.poll()));
+				extractorExecutor.submit(
+						new URLExtractor(this.extractorsSemaphore, this.queue, 
+								this::mapped, document.getDocument()));
+				
+				indexersSemaphore.acquire();
+				
+				indexerExecutor.submit(new URLIndexer(this.indexersSemaphore, document));
+				
 				this.isFull.signalAll();
 				this.lock.unlock();
 			} catch (InterruptedException e) {

@@ -2,6 +2,8 @@ package br.com.efficacious.main;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Logger;
 
 import br.com.efficacious.connection.ConnectionList;
 import br.com.efficacious.connection.ConnectionProducer;
@@ -26,6 +28,8 @@ public class Main {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
+		
+		Logger.getGlobal().addHandler(new ConsoleHandler());
 		
 		urlList.add(new URL("http://www.furb.br/web/10/portugues"));
 		urlList.add(new URL("http://g1.globo.com"));
