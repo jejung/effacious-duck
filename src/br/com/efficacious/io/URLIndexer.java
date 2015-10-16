@@ -33,17 +33,17 @@ public class URLIndexer implements Callable<Void> {
 	private static final IndexWriterConfig DEFAULT_CONFIG = new IndexWriterConfig(DEFAULT_ANALYZER);
 	
 	static {
-		try {
-			INDEX_DIRECTORY = FSDirectory.open(Paths.get(System.getProperty("user.dir") + "/index"));
-		} catch (IOException e) {
-			Logger.getGlobal().log(Level.INFO, "Cannot open Index directory, using working directory", e);
-			try {
-				INDEX_DIRECTORY = FSDirectory.open(Paths.get("/index/"));
-			} catch (IOException e1) {
-				Logger.getGlobal().log(Level.SEVERE, "Error openning index directory, exiting", e1);
-				System.exit(0);
-			}
-		}
+//		try {
+//			INDEX_DIRECTORY = FSDirectory.open(Paths.get(System.getProperty("user.dir") + "/index"));
+//		} catch (IOException e) {
+//			Logger.getGlobal().log(Level.INFO, "Cannot open Index directory, using working directory", e);
+//			try {
+//				INDEX_DIRECTORY = FSDirectory.open(Paths.get("/index/"));
+//			} catch (IOException e1) {
+//				Logger.getGlobal().log(Level.SEVERE, "Error openning index directory, exiting", e1);
+//				System.exit(0);
+//			}
+//		}
 		DEFAULT_CONFIG.setOpenMode(OpenMode.CREATE_OR_APPEND);
 	}
 	
@@ -64,6 +64,11 @@ public class URLIndexer implements Callable<Void> {
 	@Override
 	public Void call() throws Exception {
 		try {
+			
+			LuceneDirectory.getLatch().await();
+			
+			INDEX_DIRECTORY = LuceneDirectory.getDirectory();
+			
 			IndexWriter writer = new IndexWriter(INDEX_DIRECTORY, DEFAULT_CONFIG);
 			writer.updateDocument(new Term("url", this.document.getUrl().toString()), 
 					URLIndexBuilder.create(this.document.getUrl(), 
