@@ -23,27 +23,20 @@ import org.jsoup.nodes.Document;
  */
 public class URLConsumer implements Runnable {
 
+	private static final int MAX_EXTRACTORS = 10;
+	private static final int MAX_DOCUMENTS = 300;
+	
 	volatile ArrayDeque<Document> docs;
 
 	private Lock lock;
-	
-	private Condition isFull;
-	
-	private Condition isEmpty;
-	
+	private Condition full;
+	private Condition empty;
 	private URLQueue queue;
-
-	private static final int MAX_EXTRACTORS = 10;
-	
-	private static final int MAX_DOCUMENTS = 300;
-
-	private volatile int mapped = 0;
-
 	private ExecutorService executor;
-
-	private volatile Semaphore semaphore = new Semaphore(MAX_EXTRACTORS);
-	
 	private boolean alive;
+	
+	private volatile int mapped = 0;
+	private volatile Semaphore semaphore = new Semaphore(MAX_EXTRACTORS);
 
 	public URLConsumer(URLQueue urlList) {
 		this.docs = new ArrayDeque<>();
@@ -51,49 +44,48 @@ public class URLConsumer implements Runnable {
 		this.executor = Executors.newFixedThreadPool(MAX_EXTRACTORS);
 		this.alive = true;
 		this.lock = new ReentrantLock();
-		this.isFull = this.lock.newCondition();
-		this.isEmpty = this.lock.newCondition();
+		this.full = this.lock.newCondition();
+		this.empty = this.lock.newCondition();
 	}
 
 	public void addDocument(Document doc) {
-		
 		this.lock.lock();
+		
 		while (docs.size() > MAX_DOCUMENTS) {
 			try {
-				this.isFull.await();
+				full.await();
 			} catch (InterruptedException e) {
 				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
 			}
 		}
+		
 		docs.add(doc);
-		this.isEmpty.signalAll();
-		this.lock.unlock();
+		empty.signalAll();
+		lock.unlock();
 	}
 
 	@Override
 	public void run() {
-		this.collectForever();
+		collectForever();
 	}
 	
 	private synchronized int mapped() {
-		return ++this.mapped;
+		return ++mapped;
 	}
 	
-	private void collectForever(){
-		while (this.isAlive()) {
+	private void collectForever() {
+		while (isAlive()) {
 			try {
-				this.lock.lock();
+				lock.lock();
 				
-				while (this.docs.isEmpty()) {
-					this.isEmpty.await();
+				while (docs.isEmpty()) {
+					empty.await();
 				}
 				
 				semaphore.acquire();
-				executor.submit(
-						new URLExtractor(this.semaphore, this.queue, 
-								this::mapped, this.docs.poll()));
-				this.isFull.signalAll();
-				this.lock.unlock();
+				executor.submit(new URLExtractor(semaphore, queue, this::mapped, docs.poll()));
+				full.signalAll();
+				lock.unlock();
 			} catch (InterruptedException e) {
 				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
 				break;
