@@ -3,11 +3,8 @@ package br.com.efficacious.url;
 import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -73,7 +70,6 @@ public class URLQueue {
 			 */
 
 			if (queue.add(url)) {
-				System.err.println("URL enqueued: " + url);
 				Logger.getGlobal().log(Level.INFO, "URL enqueued: " + url);
 			}
 

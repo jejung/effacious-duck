@@ -5,6 +5,8 @@ package br.com.efficacious.connection;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import br.com.efficacious.url.URLQueue;
 
@@ -40,8 +42,7 @@ public class ConnectionProducer implements Runnable {
 			try {
 				connectionList.add(executor.submit(ConnectionCreator.create(urlList.pop())));
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
 			}
 		}
 	}

@@ -8,10 +8,11 @@ import java.net.URL;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Semaphore;
 import java.util.function.IntSupplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 /**
  * @author jean
@@ -50,35 +51,34 @@ public class URLExtractor implements Callable<Void> {
 	
 	private void extract(Element el) {
 
-		Elements links = el.getElementsByTag("a");
-		
-		links.parallelStream().forEach(
-			(link) -> {
-				String href = link.absUrl("href");
-				if (!href.isEmpty()) {
-					try {
-						if (!(href.endsWith(".pdf") || href.endsWith(".jpg") || href.endsWith(".avi"))) {
-							// TODO create an machanism to configure permission of https
-							// pages
-							// could be used to remove https pages, this would be
-							// configurable in the application
-//							if (href.startsWith("https")) {
-//								href = href.replaceFirst("s", "");
-//							}
-							
-							this.queue.add(new URL(href));
-						} else {
-							// TODO maybe store images on database
-							System.err.println("Midia ignored: " + href);
-						}
-					} catch (MalformedURLException e) {
-						System.err.println("Invalid URL: " + e.getMessage() + href);
-					}	
-				}	
-				
+		el.getAllElements()
+			.parallelStream()
+			.filter((e) -> {
+				return "a".equals(e.tagName());  
+			})
+			.map((e) -> { 
+				return e.absUrl("href"); 
+			})
+			.filter(
+				(href) -> { 
+					// TODO create an machanism to configure permission of https
+					// pages
+					// could be used to remove https pages, this would be
+					// configurable in the application
+//					if (href.startsWith("https")) {
+//						href = href.replaceFirst("s", "");
+//					}
+					return href != null && !href.isEmpty() && 
+							!(href.endsWith(".pdf") || href.endsWith(".jpg") || href.endsWith(".avi"));
+				})
+			.forEach((href) -> { 
+				try {
+					this.queue.add(new URL(href));
+				} catch (MalformedURLException e) {
+					System.err.println("Invalid URL: " + e.getMessage() + href);
+				}
 			});
-		System.out.println(this.incrementCallback.getAsInt() + " pages indexed so far.");
-		//Logger.getGlobal().log(Level.INFO, );
+		Logger.getGlobal().log(Level.INFO, this.incrementCallback.getAsInt() + " pages indexed so far.");
 	}
 
 }

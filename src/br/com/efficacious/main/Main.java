@@ -1,10 +1,14 @@
 package br.com.efficacious.main;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import br.com.efficacious.config.NetConfig;
 import br.com.efficacious.connection.ConnectionList;
 import br.com.efficacious.connection.ConnectionProducer;
 import br.com.efficacious.dom.HTMLList;
@@ -28,6 +32,25 @@ public class Main {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
+		
+		Proxy proxy = null;
+		
+		for (int i = 0; i < args.length; i++) {
+			try {
+				if ("-p".equals(args[i])) {
+					i++;
+					String host = args[i].split(":")[0];
+					int port = Integer.parseInt(args[i].split(":")[1]);
+					
+					proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
+				}
+			} catch (Exception e) {
+				Logger.getGlobal().log(Level.SEVERE, String.format("Invalid argument[%d]: %s", i, e.getMessage(), e));
+				throw e;
+			}
+		}
+		
+		NetConfig.instance().setProxy(proxy);
 		
 		Logger.getGlobal().addHandler(new ConsoleHandler());
 		
