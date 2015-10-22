@@ -47,10 +47,8 @@ public class LoadArgumentsResources extends Thread {
 		LuceneDirectory.setDirectory(luceneDirectory);
 		LuceneDirectory.getLatch().countDown();
 		
-		
 		NetConfig.instance().setProxy(proxy);
-		NetConfig.instance().getLatch().countDown();
-		
+		NetConfig.instance().getLatch().countDown();		
 	}
 
 	@Override
