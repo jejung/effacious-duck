@@ -18,6 +18,8 @@ import br.com.efficacious.io.LuceneDirectory;
  */
 public class CrawlerConfig {
 	
+	private static final String DEFAULT_DIRECTORY = "/index/";
+	
 	private Proxy proxy;
 	private String luceneDirectory;
 	
@@ -54,6 +56,7 @@ public class CrawlerConfig {
 	 * Default constructor. 
 	 */
 	public CrawlerConfig() {
+		this.luceneDirectory = DEFAULT_DIRECTORY;
 	}
 	/**
 	 * @return the proxy
@@ -108,7 +111,7 @@ public class CrawlerConfig {
 		 * @param proxy The proxy to use on each connection created.
 		 * @return {@code this} instance
 		 */
-		public Builder withProxy(Proxy proxy) {
+		public Builder useProxy(Proxy proxy) {
 			this.instance.setProxy(proxy);
 			return this;
 		}
@@ -156,7 +159,7 @@ public class CrawlerConfig {
 					int port = 0;
 					if (split.length > 1)
 						port = Integer.parseInt(split[1]);
-					this.withProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port)));
+					this.useProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port)));
 				} else if ("-d".equals(args[i])) {
 					this.storeIndexOn(args[++i]);
 				}

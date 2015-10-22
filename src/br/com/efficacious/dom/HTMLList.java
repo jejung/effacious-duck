@@ -16,28 +16,18 @@ import java.util.logging.Logger;
 public class HTMLList {
 
 	private static final int MAX_CONNECTIONS = 5;
-
-	private static HTMLList instance = new HTMLList();
-
-	private ArrayDeque<Future<URLDocument>> documents;
-
 	private static final int MAX_DOCS = 40;
 
+	private ArrayDeque<Future<URLDocument>> documents;
 	private ExecutorService executor;
 
-	private HTMLList() {
+	public HTMLList() {
 		documents = new ArrayDeque<>();
 		executor = Executors.newFixedThreadPool(MAX_CONNECTIONS);
 	}
 
-	public static HTMLList getInstance() {
-		return instance;
-	}
-
 	public synchronized Future<URLDocument> getAsFuture() {
-
 		try {
-
 			while (isEmpty())
 				wait();
 
@@ -49,7 +39,6 @@ public class HTMLList {
 		} catch (InterruptedException e) {
 			return null;
 		}
-
 	}
 
 	/**

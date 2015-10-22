@@ -13,10 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jsoup.nodes.Document;
-
 import br.com.efficacious.dom.URLDocument;
-import br.com.efficacious.io.URLIndexBuilder;
 import br.com.efficacious.io.URLIndexer;
 
 /**
@@ -27,30 +24,25 @@ import br.com.efficacious.io.URLIndexer;
  */
 public class URLConsumer implements Runnable {
 
-	volatile ArrayDeque<URLDocument> docs;
-
 	private static final int MAX_EXTRACTORS = 10;
-
 	private static final int MAX_DOCUMENTS = 300;
-
 	private static final int MAX_INDEXERS = 10;
 
 	private Lock lock;
 	private Condition full;
 	private Condition empty;
 	private URLQueue queue;
-
+	
+	private volatile ArrayDeque<URLDocument> docs;
 	private volatile int mapped = 0;
+	private boolean alive;
 
 	private ExecutorService extractorExecutor;
-
 	private ExecutorService indexerExecutor;
 
 	private volatile Semaphore extractorsSemaphore = new Semaphore(MAX_EXTRACTORS);
-
 	private Semaphore indexersSemaphore = new Semaphore(MAX_INDEXERS);
 
-	private boolean alive;
 
 	public URLConsumer(URLQueue urlList) {
 		this.docs = new ArrayDeque<>();
@@ -92,14 +84,13 @@ public class URLConsumer implements Runnable {
 		while (isAlive()) {
 			lock.lock();
 			try {
-
 				while (docs.isEmpty()) {
 					empty.await();
 				}
 
-				extractorsSemaphore.acquire();
 				URLDocument document = this.docs.poll();
-
+				
+				extractorsSemaphore.acquire();
 				extractorExecutor.submit(new URLExtractor(this.extractorsSemaphore, this.queue, this::mapped, document.getDocument()));
 
 				indexersSemaphore.acquire();
@@ -123,8 +114,7 @@ public class URLConsumer implements Runnable {
 	}
 
 	/**
-	 * @param alive
-	 *            the alive to set
+	 * @param alive the alive to set
 	 */
 	public void setAlive(boolean alive) {
 		this.alive = alive;

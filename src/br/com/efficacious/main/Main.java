@@ -21,9 +21,9 @@ import br.com.efficacious.url.URLQueue;
  */
 public class Main {
 
-	static volatile ConnectionList connectionList = ConnectionList.getInstance();
-	static volatile URLQueue urlList = URLQueue.getInstance();
-	static volatile HTMLList htmlList = HTMLList.getInstance();
+	static volatile ConnectionList connectionList = new ConnectionList();
+	static volatile URLQueue urlList = new URLQueue();
+	static volatile HTMLList htmlList = new HTMLList();
 
 	/**
 	 * @param args

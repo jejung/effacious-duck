@@ -19,16 +19,11 @@ import java.util.logging.Logger;
 public class ConnectionList {
 
 	private Queue<Future<URLConnection>> queue;
-	private static ConnectionList instance = new ConnectionList();
 
 	private static final int MAX_CONNECTIONS = 40;
 
-	private ConnectionList() {
+	public ConnectionList() {
 		this.queue = new ArrayDeque<>();
-	}
-
-	public static ConnectionList getInstance() {
-		return instance;
 	}
 
 	public synchronized void add(Future<URLConnection> connection) {

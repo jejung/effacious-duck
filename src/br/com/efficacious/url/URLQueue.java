@@ -6,10 +6,6 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import br.com.efficacious.dom.URLDocument;
 
 /**
  * Class that handle and URL queue to be consumed by Connection Producer.
@@ -20,8 +16,6 @@ import br.com.efficacious.dom.URLDocument;
 public class URLQueue {
 
 	private static final int MAX_URLS = 100;
-
-	private static URLQueue instance = new URLQueue();
 
 	private Queue<URL> queue;
 
@@ -34,15 +28,11 @@ public class URLQueue {
 		return queue.size();
 	}
 
-	private URLQueue() {
+	public URLQueue() {
 		this.queue = new ArrayDeque<URL>();
 		this.readLock = new ReentrantLock();
 		this.writeLock = new ReentrantLock();
 		this.isEmpty = new Object();
-	}
-
-	public static URLQueue getInstance() {
-		return instance;
 	}
 
 	public boolean isEmpty() {

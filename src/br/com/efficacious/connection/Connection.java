@@ -4,8 +4,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.Callable;
 
-import br.com.efficacious.config.NetConfig;
-
 public class Connection implements Callable<URLConnection> {
 	private URL url;
 	
@@ -17,11 +15,11 @@ public class Connection implements Callable<URLConnection> {
 	public URLConnection call() throws Exception {
 		
 		// waits for the proxy configuration completes
-		NetConfig.instance().getLatch().await();
+//		NetConfig.instance().getLatch().await();
 		
-		if (NetConfig.instance().getProxy() == null)
+//		if (NetConfig.instance().getProxy() == null)
 			return url.openConnection();
-		else
-			return url.openConnection(NetConfig.instance().getProxy());
+//		else
+//			return url.openConnection(NetConfig.instance().getProxy());
 	}
 }
