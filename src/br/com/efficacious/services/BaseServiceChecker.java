@@ -11,7 +11,7 @@ import java.util.concurrent.CountDownLatch;
  * 
  * @author Jean Jung
  */
-public abstract class BaseServiceChecker implements Callable<ServiceStatus> {
+public abstract class BaseServiceChecker implements Callable<ServiceTestResponse> {
 	
 	protected CountDownLatch latch;
 	
@@ -23,14 +23,13 @@ public abstract class BaseServiceChecker implements Callable<ServiceStatus> {
 	}
 	
 	/**
-	 * The default behavior of a {@link BaseServiceChecker} must be
-	 * check the service, countdown the {@link CountDownLatch} and 
-	 * return the {@link ServiceStatus}. 
+	 * The default behavior of a {@link BaseServiceChecker} must be check the service, 
+	 * count down the {@link CountDownLatch} and return the {@link ServiceStatus}. 
 	 * @return OK
 	 */
 	@Override
-	public ServiceStatus call() throws Exception {
+	public ServiceTestResponse call() throws Exception {
 		this.latch.countDown();
-		return ServiceStatus.OK; 
+		return ServiceTestResponse.builder().ok().noMessage(); 
 	}
 }

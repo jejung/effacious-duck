@@ -22,6 +22,7 @@ public class CrawlerConfig {
 	
 	private Proxy proxy;
 	private String luceneDirectory;
+	private InetSocketAddress testAddress;
 	
 	/**
 	 * Create a proxy based config.
@@ -31,6 +32,7 @@ public class CrawlerConfig {
 	public CrawlerConfig(Proxy proxy) {
 		super();
 		this.proxy = proxy;
+		this.testAddress = new InetSocketAddress("http://www.google.com", 80);
 	}
 	/**
 	 * Create a directory based config.
@@ -84,6 +86,18 @@ public class CrawlerConfig {
 	}
 	
 	/**
+	 * @return the testAddress
+	 */
+	public InetSocketAddress getTestAddress() {
+		return testAddress;
+	}
+	/**
+	 * @param testAddress the testAddress to set
+	 */
+	public void setTestAddress(InetSocketAddress testAddress) {
+		this.testAddress = testAddress;
+	}
+	/**
 	 * Initializes a builder that can configure and create an instance
 	 * of this configuration.
 	 * 
@@ -128,6 +142,23 @@ public class CrawlerConfig {
 		}
 		
 		/**
+		 * Define the initial connection test must be used.
+		 * In the initialization of the Crawler it check for all needed services
+		 * and the network is one of them. With this configuration you can choose if
+		 * the test will be local or remote, by giving this kind of address. To improve the 
+		 * test performance the address must be a very accessed service, and should respond 
+		 * fast too. By default we are using <a href="http://www.google.com:80">http://www.google.com:80</a>
+		 * because it's the most obvious option.
+		 *  
+		 * @param at The address where you want to connect to verify the services.
+		 * @return {@code this} instance
+		 */
+		public Builder makeConnectionTest(InetSocketAddress at) {
+			this.instance.setTestAddress(at);
+			return this;
+		}
+		
+		/**
 		 * Parse and create the parameters for this {@link CrawlerConfig} instance.
 		 * The valid parameters are described below:
 		 * 
@@ -150,7 +181,7 @@ public class CrawlerConfig {
 		 * @return {@code this} instance
 		 */
 		public Builder initFromArgs(String[] args) {
-			
+			Builder result = this;
 			for (int i = 0; i < args.length; i++) {
 				if ("-p".equals(args[i])) {
 					i++;
@@ -159,12 +190,12 @@ public class CrawlerConfig {
 					int port = 0;
 					if (split.length > 1)
 						port = Integer.parseInt(split[1]);
-					this.useProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port)));
+					result = result.useProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port)));
 				} else if ("-d".equals(args[i])) {
-					this.storeIndexOn(args[++i]);
+					result = result.storeIndexOn(args[++i]);
 				}
 			}
-			return this;
+			return result;
 		}
 		
 		/**
