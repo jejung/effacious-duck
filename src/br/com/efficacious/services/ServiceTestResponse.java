@@ -11,14 +11,17 @@ package br.com.efficacious.services;
  */
 public class ServiceTestResponse {
 
+	private BaseServiceTester tester;
 	private ServiceStatus status;
 	private Exception causeFailed;
 	private String message;
 	
 	/**
 	 * Don't allow to call this method from outside the response builder. 
+	 * @param tester 
 	 */
-	private ServiceTestResponse() {
+	private ServiceTestResponse(BaseServiceTester tester) {
+		this.tester = tester;
 	}
 	
 	/**
@@ -26,8 +29,8 @@ public class ServiceTestResponse {
 	 *  
 	 * @return
 	 */
-	public static ResponseBuilder builder() {
-		return new ResponseBuilder();
+	public static ResponseBuilder builder(BaseServiceTester tester) {
+		return new ResponseBuilder(tester);
 	} 
 	
 	/**
@@ -73,6 +76,20 @@ public class ServiceTestResponse {
 	}
 
 	/**
+	 * @return the tester
+	 */
+	public BaseServiceTester getTester() {
+		return tester;
+	}
+
+	/**
+	 * @param tester the tester to set
+	 */
+	public void setTester(BaseServiceTester tester) {
+		this.tester = tester;
+	}
+
+	/**
 	 * The response builder class.
 	 * 
 	 * @author Jean Jung
@@ -84,9 +101,10 @@ public class ServiceTestResponse {
 		/**
 		 * Private constructor, the right way is to {@link ServiceTestResponse} provide the builder access to
 		 * avoid sub-class access like {@code A.B b = A.B();}  
+		 * @param tester 
 		 */
-		private ResponseBuilder() {
-			this.instance = new ServiceTestResponse();
+		private ResponseBuilder(BaseServiceTester tester) {
+			this.instance = new ServiceTestResponse(tester);
 		}
 		
 		/**

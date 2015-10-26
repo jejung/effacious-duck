@@ -4,8 +4,9 @@
 package br.com.efficacious.services;
 
 /**
- * @author jean
- *
+ * Status of a service.
+ * 
+ * @author Jean Jung
  */
 public enum ServiceStatus {
 

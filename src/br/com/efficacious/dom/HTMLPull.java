@@ -3,10 +3,10 @@ package br.com.efficacious.dom;
 import java.net.URLConnection;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jsoup.helper.HttpConnection;
 
+import br.com.efficacious.config.CrawlerConfig;
 import br.com.efficacious.connection.ConnectionList;
 
 /**
@@ -20,8 +20,10 @@ public class HTMLPull implements Runnable {
 	private ConnectionList connectionList;
 	private HTMLList htmlList;
 	private boolean alive;
+	private CrawlerConfig config;
 
-	public HTMLPull(ConnectionList connectionList, HTMLList htmlList) {
+	public HTMLPull(CrawlerConfig config, ConnectionList connectionList, HTMLList htmlList) {
+		this.config = config;
 		this.connectionList = connectionList;
 		this.htmlList = htmlList;
 		this.alive = true;
@@ -40,7 +42,7 @@ public class HTMLPull implements Runnable {
 				URLConnection con = this.connectionList.getAsFuture().get();
 				htmlList.add(con);
 			} catch (InterruptedException | ExecutionException e) {
-				Logger.getGlobal().log(Level.SEVERE, "Error producing connections", e);
+				this.config.getLogger().log(Level.SEVERE, "Error producing connections", e);
 			}
 		}
 	}
@@ -48,14 +50,14 @@ public class HTMLPull implements Runnable {
 	/**
 	 * @return the alive
 	 */
-	public boolean isAlive() {
+	public synchronized boolean isAlive() {
 		return alive;
 	}
 
 	/**
 	 * @param alive the alive to set
 	 */
-	public void setAlive(boolean alive) {
+	public synchronized void setAlive(boolean alive) {
 		this.alive = alive;
 	}
 }

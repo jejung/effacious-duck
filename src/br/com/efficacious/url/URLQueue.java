@@ -6,6 +6,8 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class that handle and URL queue to be consumed by Connection Producer.
@@ -42,6 +44,10 @@ public class URLQueue {
 	public boolean isFull() {
 		return queue.size() > MAX_URLS;
 	}
+	
+	public void add(URL url) {
+		this.add(url, null);
+	}
 
 	public void add(URL url, String from) {
 
@@ -63,7 +69,7 @@ public class URLQueue {
 			 */
 
 			if (queue.add(url)) {
-				// Logger.getGlobal().log(Level.INFO, "URL enqueued: " + url);
+				 Logger.getGlobal().log(Level.INFO, "URL enqueued: " + url);
 			}
 
 			if (from != null && !getHostName(from).equals(url.getHost())) {

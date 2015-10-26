@@ -6,7 +6,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import br.com.efficacious.config.CrawlerConfig;
 
 /**
  * 
@@ -20,8 +21,10 @@ public class HTMLList {
 
 	private ArrayDeque<Future<URLDocument>> documents;
 	private ExecutorService executor;
+	private CrawlerConfig config;
 
-	public HTMLList() {
+	public HTMLList(CrawlerConfig config) {
+		this.config = config;
 		documents = new ArrayDeque<>();
 		executor = Executors.newFixedThreadPool(MAX_CONNECTIONS);
 	}
@@ -51,7 +54,7 @@ public class HTMLList {
 			try {
 				wait();
 			} catch (InterruptedException e) {
-				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
+				this.config.getLogger().log(Level.SEVERE, "Thread interrupted", e);
 			}
 		}
 

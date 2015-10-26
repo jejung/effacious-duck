@@ -11,8 +11,8 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import br.com.efficacious.config.CrawlerConfig;
 import br.com.efficacious.dom.URLDocument;
 import br.com.efficacious.io.URLIndexer;
 
@@ -42,9 +42,11 @@ public class URLConsumer implements Runnable {
 
 	private volatile Semaphore extractorsSemaphore = new Semaphore(MAX_EXTRACTORS);
 	private Semaphore indexersSemaphore = new Semaphore(MAX_INDEXERS);
+	private CrawlerConfig config;
 
 
-	public URLConsumer(URLQueue urlList) {
+	public URLConsumer(CrawlerConfig config, URLQueue urlList) {
+		this.config = config; 
 		this.docs = new ArrayDeque<>();
 		this.queue = urlList;
 		this.extractorExecutor = Executors.newFixedThreadPool(MAX_EXTRACTORS);
@@ -62,7 +64,7 @@ public class URLConsumer implements Runnable {
 			try {
 				full.await();
 			} catch (InterruptedException e) {
-				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
+				this.config.getLogger().log(Level.SEVERE, "Thread interrupted", e);
 			}
 		}
 
@@ -81,11 +83,13 @@ public class URLConsumer implements Runnable {
 	}
 
 	private void collectForever() {
-		while (isAlive()) {
+		aliveLoop: while (isAlive()) {
 			lock.lock();
 			try {
 				while (docs.isEmpty()) {
 					empty.await();
+					if (!this.isAlive())
+						break aliveLoop;
 				}
 
 				URLDocument document = this.docs.poll();
@@ -98,7 +102,7 @@ public class URLConsumer implements Runnable {
 
 				full.signalAll();
 			} catch (InterruptedException e) {
-				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
+				this.config.getLogger().log(Level.SEVERE, "Thread interrupted", e);
 				break;
 			} finally {
 				lock.unlock();
@@ -109,14 +113,14 @@ public class URLConsumer implements Runnable {
 	/**
 	 * @return the alive
 	 */
-	public boolean isAlive() {
+	public synchronized boolean isAlive() {
 		return alive;
 	}
 
 	/**
 	 * @param alive the alive to set
 	 */
-	public void setAlive(boolean alive) {
+	public synchronized void setAlive(boolean alive) {
 		this.alive = alive;
 	}
 }

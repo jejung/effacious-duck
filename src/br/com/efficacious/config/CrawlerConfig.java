@@ -5,9 +5,11 @@ package br.com.efficacious.config;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.util.logging.Logger;
 
 import org.jsoup.helper.HttpConnection;
 
+import br.com.efficacious.io.EfficaciousLogHandler;
 import br.com.efficacious.io.LuceneDirectory;
 
 /**
@@ -23,6 +25,7 @@ public class CrawlerConfig {
 	private Proxy proxy;
 	private String luceneDirectory;
 	private InetSocketAddress testAddress;
+	private Logger logger;
 	
 	/**
 	 * Create a proxy based config.
@@ -30,9 +33,8 @@ public class CrawlerConfig {
 	 * @param proxy
 	 */
 	public CrawlerConfig(Proxy proxy) {
-		super();
+		this();
 		this.proxy = proxy;
-		this.testAddress = new InetSocketAddress("http://www.google.com", 80);
 	}
 	/**
 	 * Create a directory based config.
@@ -40,7 +42,7 @@ public class CrawlerConfig {
 	 * @param luceneDirectory
 	 */
 	public CrawlerConfig(String luceneDirectory) {
-		super();
+		this();
 		this.luceneDirectory = luceneDirectory;
 	}
 	/**
@@ -50,7 +52,7 @@ public class CrawlerConfig {
 	 * @param luceneDirectory
 	 */
 	public CrawlerConfig(Proxy proxy, String luceneDirectory) {
-		super();
+		this();
 		this.proxy = proxy;
 		this.luceneDirectory = luceneDirectory;
 	}
@@ -59,6 +61,9 @@ public class CrawlerConfig {
 	 */
 	public CrawlerConfig() {
 		this.luceneDirectory = DEFAULT_DIRECTORY;
+		this.proxy = null;
+		this.testAddress = new InetSocketAddress("http://www.google.com", 80);
+		this.logger = Logger.getGlobal();
 	}
 	/**
 	 * @return the proxy
@@ -97,6 +102,21 @@ public class CrawlerConfig {
 	public void setTestAddress(InetSocketAddress testAddress) {
 		this.testAddress = testAddress;
 	}
+	
+	/**
+	 * @param logger the logger to set
+	 */
+	public void setLogger(Logger logger) {
+		this.logger = logger;
+	}
+	
+	/**
+	 * @return the logger
+	 */
+	public Logger getLogger() {
+		return logger;
+	}
+	
 	/**
 	 * Initializes a builder that can configure and create an instance
 	 * of this configuration.
@@ -175,6 +195,10 @@ public class CrawlerConfig {
 		 *   	<td> -d /path/to/index </td>
 		 *   	<td> The {@link LuceneDirectory} to store the HTML data. </td>
 		 *   </tr>
+		 *   <tr>
+		 *   	<td> -l logger.name </td>
+		 *   	<td> The name of the {@link Logger} that will be used to log all the messages. </td>
+		 *   </tr>
 		 * </table>
 		 * 
 		 * @param args The main program args.
@@ -193,11 +217,26 @@ public class CrawlerConfig {
 					result = result.useProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port)));
 				} else if ("-d".equals(args[i])) {
 					result = result.storeIndexOn(args[++i]);
+				} else if ("-l".equals(args[i])) {
+					result = result.logOn(args[++i]);
 				}
 			}
 			return result;
 		}
 		
+		/**
+		 * Log the information on the given logger name. By default Efficacious add
+		 * all the informations on a specific console handler called {@link EfficaciousLogHandler},
+		 * by now this option cannot be ignored.
+		 * 
+		 * @param name 
+		 * @return
+		 */
+		private Builder logOn(String name) {
+			this.instance.setLogger(Logger.getLogger(name));
+			return this;
+		}
+
 		/**
 		 * Build and return the parametrized instance of the {@link CrawlerConfig}.
 		 * 

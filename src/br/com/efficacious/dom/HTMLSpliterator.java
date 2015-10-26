@@ -2,8 +2,8 @@ package br.com.efficacious.dom;
 
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import br.com.efficacious.config.CrawlerConfig;
 import br.com.efficacious.url.URLConsumer;
 
 /**
@@ -15,12 +15,14 @@ import br.com.efficacious.url.URLConsumer;
 public class HTMLSpliterator implements Runnable {
 
 	private HTMLList htmlList;
-	private URLConsumer urlExtractor;
+	private URLConsumer urlConsumer;
 	private boolean alive;
+	private CrawlerConfig config;
 
-	public HTMLSpliterator(HTMLList htmlList, URLConsumer urlExtractor) {
+	public HTMLSpliterator(CrawlerConfig config, HTMLList htmlList, URLConsumer urlExtractor) {
+		this.config = config;
 		this.htmlList = htmlList;
-		this.urlExtractor = urlExtractor;
+		this.urlConsumer = urlExtractor;
 		this.setAlive(true);
 	}
 
@@ -37,10 +39,10 @@ public class HTMLSpliterator implements Runnable {
 				// TODO fix in some way that don't need this if clause
 				// could be happen in some cases of timeout connection
 				if (urlDocument != null) {
-					this.urlExtractor.addDocument(urlDocument);
+					this.urlConsumer.addDocument(urlDocument);
 				}
 			} catch (InterruptedException | ExecutionException e) {
-				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
+				this.config.getLogger().log(Level.SEVERE, "Thread interrupted", e);
 			}
 		}
 	}
@@ -48,14 +50,14 @@ public class HTMLSpliterator implements Runnable {
 	/**
 	 * @return the alive
 	 */
-	public boolean isAlive() {
+	public synchronized boolean isAlive() {
 		return alive;
 	}
 
 	/**
 	 * @param alive the alive to set
 	 */
-	public void setAlive(boolean alive) {
+	public synchronized void setAlive(boolean alive) {
 		this.alive = alive;
 	}
 }

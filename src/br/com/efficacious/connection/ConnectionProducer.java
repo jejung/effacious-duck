@@ -6,8 +6,8 @@ package br.com.efficacious.connection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import br.com.efficacious.config.CrawlerConfig;
 import br.com.efficacious.url.URLQueue;
 
 /**
@@ -25,7 +25,10 @@ public class ConnectionProducer implements Runnable {
 	private ConnectionList connectionList;
 	private boolean alive;
 	
-	public ConnectionProducer(URLQueue urlList, ConnectionList connectionList) {
+	private CrawlerConfig config;
+	
+	public ConnectionProducer(CrawlerConfig config, URLQueue urlList, ConnectionList connectionList) {
+		this.config = config;
 		this.urlList = urlList;
 		this.connectionList = connectionList;
 		this.executor = Executors.newFixedThreadPool(MAX_CONNECTIONS);
@@ -40,9 +43,9 @@ public class ConnectionProducer implements Runnable {
 	private void produceForever() {
 		while (isAlive()) {
 			try {
-				connectionList.add(executor.submit(ConnectionCreator.create(urlList.pop())));
+				connectionList.add(executor.submit(ConnectionCreator.create(this.config, urlList.pop())));
 			} catch (InterruptedException e) {
-				Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
+				this.config.getLogger().log(Level.SEVERE, "Thread interrupted", e);
 			}
 		}
 	}
@@ -50,14 +53,14 @@ public class ConnectionProducer implements Runnable {
 	/**
 	 * @return the alive
 	 */
-	public boolean isAlive() {
+	public synchronized boolean isAlive() {
 		return this.alive;
 	}
 
 	/**
 	 * @param alive the alive to set
 	 */
-	public void setAlive(boolean alive) {
+	public synchronized void setAlive(boolean alive) {
 		this.alive = alive;
 	}
 

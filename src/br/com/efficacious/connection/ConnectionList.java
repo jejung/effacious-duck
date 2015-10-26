@@ -6,7 +6,8 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import br.com.efficacious.config.CrawlerConfig;
 
 /**
  * Thread-Safe list of connections that holds all the open and not used
@@ -20,9 +21,12 @@ public class ConnectionList {
 
 	private Queue<Future<URLConnection>> queue;
 
+	private CrawlerConfig config;
+
 	private static final int MAX_CONNECTIONS = 40;
 
-	public ConnectionList() {
+	public ConnectionList(CrawlerConfig config) {
+		this.config = config;
 		this.queue = new ArrayDeque<>();
 	}
 
@@ -33,7 +37,7 @@ public class ConnectionList {
 			}
 			queue.add(connection);
 		} catch (InterruptedException e) {
-			Logger.getGlobal().log(Level.SEVERE, "Thread interrupted", e);
+			this.config.getLogger().log(Level.SEVERE, "Thread interrupted", e);
 		} 
 		
 		notifyAll();
