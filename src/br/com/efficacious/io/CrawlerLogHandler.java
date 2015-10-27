@@ -11,23 +11,23 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 /**
+ * A console based log handler with a simple and specific format.
+ * 
  * @author Jean Jung
- *
  */
-public class EfficaciousLogHandler extends Handler {
+public class CrawlerLogHandler extends Handler {
 	
 	private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance();
 
 	/**
-	 * Actually, it does nothing.
+	 * Actually, it does nothing, because we cannot close the stderr or stdout.
 	 */
 	@Override
-	public void close() throws SecurityException {	
+	public void close() throws SecurityException {
 	}
 
 	/**
-	 * Flushes the two possible outputs for this handler,
-	 * {@link System#out} and {@link System#err}
+	 * Flushes the two possible outputs for this handler, {@link System#out} and {@link System#err}.
 	 */
 	@Override
 	public void flush() {
@@ -36,7 +36,8 @@ public class EfficaciousLogHandler extends Handler {
 	}
 
 	/**
-	 * Write on the console.
+	 * Write the log record on the console, it can be the {@link System#out} or {@link System#err} {@link PrintStream}s.
+	 * If the {@link LogRecord} define a exception cause, the stack trace will be printed on the {@link PrintStream}.
 	 */
 	@Override
 	public void publish(LogRecord record) {
@@ -47,7 +48,8 @@ public class EfficaciousLogHandler extends Handler {
 		else
 			stream = System.out;
 		
-		stream.format("%s %s : %s\n",
+		stream.format("THREAD %d - %s %s : %s\n",
+			record.getThreadID(),
 			record.getLevel().toString(),
 			DATE_FORMAT.format(new Date(record.getMillis())),
 			record.getMessage());

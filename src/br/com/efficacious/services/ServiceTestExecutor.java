@@ -41,6 +41,8 @@ public final class ServiceTestExecutor implements Runnable {
 			this.result = this.serviceTester.test();
 		} catch (Exception e) {
 			this.result = ServiceTestResponse.builder(this.serviceTester).failed().because(e).message("Failed on test service: " + this.serviceTester.getName());
+		} finally {
+			this.latch.countDown();
 		}
 	}
 

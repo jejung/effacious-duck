@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 
 import org.jsoup.helper.HttpConnection;
 
-import br.com.efficacious.io.EfficaciousLogHandler;
+import br.com.efficacious.io.CrawlerLogHandler;
 import br.com.efficacious.io.LuceneDirectory;
 
 /**
@@ -226,7 +226,7 @@ public class CrawlerConfig {
 		
 		/**
 		 * Log the information on the given logger name. By default Efficacious add
-		 * all the informations on a specific console handler called {@link EfficaciousLogHandler},
+		 * all the informations on a specific console handler called {@link CrawlerLogHandler},
 		 * by now this option cannot be ignored.
 		 * 
 		 * @param name 

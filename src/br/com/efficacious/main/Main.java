@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 import br.com.efficacious.config.CrawlerConfig;
 import br.com.efficacious.crawler.WebCrawler;
-import br.com.efficacious.io.EfficaciousLogHandler;
+import br.com.efficacious.io.CrawlerLogHandler;
 
 /**
  * @author johnny w. g. g.
@@ -21,20 +21,18 @@ public class Main {
 	/**
 	 * @param args
 	 * @throws IOException
+	 * @throws InterruptedException 
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 
-		Logger.getGlobal().addHandler(new EfficaciousLogHandler());
+		Logger.getGlobal().addHandler(new CrawlerLogHandler());
 		Logger.getGlobal().setLevel(Level.ALL);
 		
 		CrawlerConfig config = CrawlerConfig.builder().initFromArgs(args).build();
 		WebCrawler crawler = new WebCrawler(config);
 		
-		try {
-			crawler.start();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		crawler.start();
+		
 		// initiates the resources configuration
 //		new LoadArgumentsResources(args).start();
 //

@@ -96,7 +96,7 @@ public class WebCrawler {
 		Proxy proxy = this.config.getProxy();
 		NetworkServiceTester netTester;
 		if (proxy != null)
-			netTester = new NetworkServiceTester(this.config.getTestAddress(), proxy);
+			netTester = new NetworkServiceTester(this.config.getTestAddress(), proxy.address());
 		else
 			netTester = new NetworkServiceTester(this.config.getTestAddress());
 		

@@ -28,7 +28,6 @@ import br.com.efficacious.services.ServiceTestResponse;
 public class CrawlerStartUp {
 	
 	private Set<BaseServiceTester> serviceTesters;
-	private ExecutorService executor;
 	private boolean failed;
 	
 	/**
@@ -36,7 +35,6 @@ public class CrawlerStartUp {
 	 */
 	public CrawlerStartUp() {
 		this.serviceTesters = new HashSet<>();
-		this.executor = Executors.newWorkStealingPool();
 		this.failed = false;
 	}
 	
@@ -58,12 +56,13 @@ public class CrawlerStartUp {
 	 * @throws InterruptedException 
 	 */
 	public void testAll() throws InterruptedException {
+		ExecutorService executor = Executors.newFixedThreadPool(this.serviceTesters.size());
 		CountDownLatch latch = new CountDownLatch(this.serviceTesters.size());
 		ServiceTestExecutor[] testExecutors = new ServiceTestExecutor[this.serviceTesters.size()];
 		int i = 0;
 		for (BaseServiceTester baseServiceTester : serviceTesters) {
 			testExecutors[i] = new ServiceTestExecutor(baseServiceTester, latch);
-			this.executor.execute(testExecutors[i]);
+			executor.execute(testExecutors[i]);
 			i++;
 		}
 		latch.await();

@@ -3,9 +3,11 @@
  */
 package br.com.efficacious.services;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.Objects;
 
 /**
@@ -19,17 +21,17 @@ public class NetworkServiceTester extends BaseServiceTester {
 	private static final String TESTER_NAME = "NetworkServiceTester";
 	
 	private InetSocketAddress address;
-	private Proxy proxy;
+	private SocketAddress proxyAddress;
 	
 	/**
 	 * Creates a checker on the given host through the proxy.
 	 * 
 	 * @param address The address to try to connect.
-	 * @param proxy The proxy to go through
+	 * @param socketAddress The proxy to go through
 	 */
-	public NetworkServiceTester(InetSocketAddress address, Proxy proxy) {
+	public NetworkServiceTester(InetSocketAddress address, SocketAddress socketAddress) {
 		this(address);
-		this.proxy = proxy;
+		this.proxyAddress = socketAddress;
 	}
 	
 	/**
@@ -43,20 +45,21 @@ public class NetworkServiceTester extends BaseServiceTester {
 
 	/**
 	 * Makes the test when the service is called.
+	 * @throws IOException 
 	 */
 	@Override
-	public ServiceTestResponse test() throws Exception {
+	public ServiceTestResponse test() throws IOException {
 		Objects.requireNonNull(this.address, "The address must not be null");
 		Socket socket = null;
 		try {
-			if (this.proxy != null) 
-				socket = new Socket(this.proxy);
+			if (this.proxyAddress != null) 
+				socket = new Socket(new Proxy(Proxy.Type.SOCKS, proxyAddress));
 			else
 				socket = new Socket();
-			
-			socket.connect(address);
+			socket.connect(address, 3000);
 		} finally {
-			socket.close();
+			if (socket != null)
+				socket.close();
 		}
 		
 		return ServiceTestResponse.builder(this).ok().message("Successfully test connection to: " + address.toString());
