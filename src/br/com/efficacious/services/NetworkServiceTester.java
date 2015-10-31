@@ -18,7 +18,7 @@ import java.util.Objects;
  */
 public class NetworkServiceTester extends BaseServiceTester {
 
-	private static final String TESTER_NAME = "NetworkServiceTester";
+	private static final String TESTER_NAME = NetworkServiceTester.class.getName();
 	
 	private InetSocketAddress address;
 	private SocketAddress proxyAddress;
@@ -56,12 +56,15 @@ public class NetworkServiceTester extends BaseServiceTester {
 				socket = new Socket(new Proxy(Proxy.Type.SOCKS, proxyAddress));
 			else
 				socket = new Socket();
-			socket.connect(address, 3000);
+			socket.connect(address);
 		} finally {
 			if (socket != null)
 				socket.close();
 		}
 		
-		return ServiceTestResponse.builder(this).ok().message("Successfully test connection to: " + address.toString());
+		return ServiceTestResponse
+				.builder(this)
+				.ok()
+				.message("Successfully test connection to: " + address.toString());
 	}
 }

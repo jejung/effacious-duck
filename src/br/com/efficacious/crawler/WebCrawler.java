@@ -46,7 +46,7 @@ public class WebCrawler {
 	 */
 	public WebCrawler() {
 		this.config = new CrawlerConfig();
-		this.startUp = new CrawlerStartUp();
+		this.startUp = new CrawlerStartUp(this.config);
 		this.urlQueue = new URLQueue();
 	}
 	
@@ -57,7 +57,7 @@ public class WebCrawler {
 	 */
 	public WebCrawler(CrawlerConfig config) {
 		this.config = config;
-		this.startUp = new CrawlerStartUp();
+		this.startUp = new CrawlerStartUp(config);
 		this.urlQueue = new URLQueue();
 	}
 	

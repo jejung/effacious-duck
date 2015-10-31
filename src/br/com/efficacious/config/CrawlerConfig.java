@@ -62,7 +62,7 @@ public class CrawlerConfig {
 	public CrawlerConfig() {
 		this.luceneDirectory = DEFAULT_DIRECTORY;
 		this.proxy = null;
-		this.testAddress = new InetSocketAddress("http://www.google.com", 80);
+		this.testAddress = new InetSocketAddress("www.google.com", 80);
 		this.logger = Logger.getGlobal();
 	}
 	/**
@@ -232,7 +232,7 @@ public class CrawlerConfig {
 		 * @param name 
 		 * @return
 		 */
-		private Builder logOn(String name) {
+		public Builder logOn(String name) {
 			this.instance.setLogger(Logger.getLogger(name));
 			return this;
 		}

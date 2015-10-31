@@ -9,8 +9,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import br.com.efficacious.config.CrawlerConfig;
 import br.com.efficacious.services.BaseServiceTester;
 import br.com.efficacious.services.ServiceStatus;
 import br.com.efficacious.services.ServiceTestExecutor;
@@ -27,13 +27,15 @@ import br.com.efficacious.services.ServiceTestResponse;
  */
 public class CrawlerStartUp {
 	
+	private CrawlerConfig config;
 	private Set<BaseServiceTester> serviceTesters;
 	private boolean failed;
 	
 	/**
 	 * Constructs a new StartUp.
 	 */
-	public CrawlerStartUp() {
+	public CrawlerStartUp(CrawlerConfig config) {
+		this.config = config;
 		this.serviceTesters = new HashSet<>();
 		this.failed = false;
 	}
@@ -66,6 +68,7 @@ public class CrawlerStartUp {
 			i++;
 		}
 		latch.await();
+		executor.shutdown();
 		for (ServiceTestExecutor serviceTestExecutor : testExecutors) {
 			ServiceTestResponse result = serviceTestExecutor.getResult();
 			if (result.getStatus() != ServiceStatus.OK) {
@@ -73,15 +76,17 @@ public class CrawlerStartUp {
 				this.failed = true;
 			} else
 				logOK(result);
-		}	
+		}
 	}
 	
-	private static void logFailed(ServiceTestResponse result) {
-		Logger.getGlobal().log(Level.SEVERE, String.format("SERVICE TEST %s: %s", result.getTester(), result.getMessage()), result.getCauseFailed());
+	private void logFailed(ServiceTestResponse result) {
+		this.config.getLogger()
+			.log(Level.SEVERE, String.format("SERVICE TEST %s: %s", result.getTester(), result.getMessage()), result.getCauseFailed());
 	}
 	
-	private static void logOK(ServiceTestResponse result) {
-		Logger.getGlobal().log(Level.INFO, String.format("SERVICE TEST %s: %s", result.getTester(), result.getMessage()));
+	private void logOK(ServiceTestResponse result) {
+		this.config.getLogger()
+			.log(Level.INFO, String.format("SERVICE TEST %s: %s", result.getTester(), result.getMessage()));
 	}
 
 	/**
