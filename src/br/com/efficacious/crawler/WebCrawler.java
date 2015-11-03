@@ -3,7 +3,6 @@
  */
 package br.com.efficacious.crawler;
 
-import java.net.Proxy;
 import java.net.URL;
 import java.util.Objects;
 
@@ -47,7 +46,7 @@ public class WebCrawler {
 	public WebCrawler() {
 		this.config = new CrawlerConfig();
 		this.startUp = new CrawlerStartUp(this.config);
-		this.urlQueue = new URLQueue();
+		this.urlQueue = new URLQueue(this.config);
 	}
 	
 	/**
@@ -58,7 +57,7 @@ public class WebCrawler {
 	public WebCrawler(CrawlerConfig config) {
 		this.config = config;
 		this.startUp = new CrawlerStartUp(config);
-		this.urlQueue = new URLQueue();
+		this.urlQueue = new URLQueue(config);
 	}
 	
 	/**
@@ -93,14 +92,7 @@ public class WebCrawler {
 	 */
 	private NetworkServiceTester createNetworkTest() {
 		
-		Proxy proxy = this.config.getProxy();
-		NetworkServiceTester netTester;
-		if (proxy != null)
-			netTester = new NetworkServiceTester(this.config.getTestAddress(), proxy.address());
-		else
-			netTester = new NetworkServiceTester(this.config.getTestAddress());
-		
-		return netTester;
+		return new NetworkServiceTester(this.config.getTestAddress(), this.config.getProxy());
 	}
 	
 	/**

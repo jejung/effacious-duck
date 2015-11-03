@@ -57,8 +57,7 @@ public class HTMLList {
 				this.config.getLogger().log(Level.SEVERE, "Thread interrupted", e);
 			}
 		}
-
-		documents.add(executor.submit(new DocumentCreator(connection)));
+		documents.add(executor.submit(new DocumentCreator(this.config, connection)));
 		notifyAll();
 	}
 

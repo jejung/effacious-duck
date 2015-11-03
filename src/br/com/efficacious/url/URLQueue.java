@@ -7,7 +7,8 @@ import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import br.com.efficacious.config.CrawlerConfig;
 
 /**
  * Class that handle and URL queue to be consumed by Connection Producer.
@@ -25,13 +26,16 @@ public class URLQueue {
 	private Lock readLock;
 
 	private Object isEmpty;
+	
+	private CrawlerConfig config;
 
 	public int size() {
 		return queue.size();
 	}
 
-	public URLQueue() {
-		this.queue = new ArrayDeque<URL>();
+	public URLQueue(CrawlerConfig config) {
+		this.config = config;
+		this.queue = new ArrayDeque<>();
 		this.readLock = new ReentrantLock();
 		this.writeLock = new ReentrantLock();
 		this.isEmpty = new Object();
@@ -69,7 +73,7 @@ public class URLQueue {
 			 */
 
 			if (queue.add(url)) {
-				 Logger.getGlobal().log(Level.INFO, "URL enqueued: " + url);
+				 this.config.getLogger().log(Level.INFO, "URL enqueued: " + url);
 			}
 
 			if (from != null && !getHostName(from).equals(url.getHost())) {
@@ -91,7 +95,8 @@ public class URLQueue {
 	private String getHostName(String urlInput) {
 		urlInput = urlInput.toLowerCase();
 		String hostName = urlInput;
-		if (!urlInput.equals("")) {
+		
+		if (!"".equals(urlInput)) {
 			if (urlInput.startsWith("http") || urlInput.startsWith("https")) {
 				try {
 					URL netUrl = new URL(urlInput);
@@ -102,9 +107,9 @@ public class URLQueue {
 				}
 			}
 			return hostName;
-		} else {
-			return "";
 		}
+		
+		return urlInput;
 	}
 
 	public URL pop() throws InterruptedException {

@@ -41,7 +41,7 @@ public class URLConsumer implements Runnable {
 	private ExecutorService indexerExecutor;
 
 	private volatile Semaphore extractorsSemaphore = new Semaphore(MAX_EXTRACTORS);
-	private Semaphore indexersSemaphore = new Semaphore(MAX_INDEXERS);
+	private volatile Semaphore indexersSemaphore = new Semaphore(MAX_INDEXERS);
 	private CrawlerConfig config;
 
 
@@ -95,7 +95,7 @@ public class URLConsumer implements Runnable {
 				URLDocument document = this.docs.poll();
 				
 				extractorsSemaphore.acquire();
-				extractorExecutor.submit(new URLExtractor(this.extractorsSemaphore, this.queue, this::mapped, document.getDocument()));
+				extractorExecutor.submit(new URLExtractor(this.config, this.extractorsSemaphore, this.queue, this::mapped, document.getDocument()));
 
 				indexersSemaphore.acquire();
 				indexerExecutor.submit(new URLIndexer(this.indexersSemaphore, document));

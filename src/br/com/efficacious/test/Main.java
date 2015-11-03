@@ -1,5 +1,7 @@
 package br.com.efficacious.test;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,10 +17,10 @@ import br.com.efficacious.io.CrawlerLogHandler;
  */
 public class Main {
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws InterruptedException, MalformedURLException {
 
 		Logger crawlerLogger = Logger.getLogger("CrawlerLogger");
-		
+		crawlerLogger.setUseParentHandlers(false);
 		crawlerLogger.addHandler(new CrawlerLogHandler());
 		crawlerLogger.setLevel(Level.ALL);
 		
@@ -28,7 +30,8 @@ public class Main {
 								.logOn(crawlerLogger.getName())
 								.build();
 		WebCrawler crawler = new WebCrawler(config);
-		
+		crawler.addURL(new URL("http://www.globo.com"));
+		crawler.addURL(new URL("http://www.furb.br"));
 		crawler.start();
 	}
 }

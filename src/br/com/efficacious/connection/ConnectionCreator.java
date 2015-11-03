@@ -18,11 +18,14 @@ public class ConnectionCreator implements Callable<URLConnection> {
 	
 	@Override
 	public URLConnection call() throws Exception {
+		URLConnection connection = null;
 		
 		if (this.config.getProxy() == null)
-			return url.openConnection();
+			connection =  url.openConnection();
 		else
-			return url.openConnection(this.config.getProxy());
+			connection = url.openConnection(this.config.getProxy());
+		
+		return connection;
 	}
 
 	/**

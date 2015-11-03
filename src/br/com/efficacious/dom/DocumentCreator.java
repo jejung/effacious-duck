@@ -12,6 +12,8 @@ import java.util.logging.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import br.com.efficacious.config.CrawlerConfig;
+
 /**
  * @author Jean Jung
  *
@@ -19,11 +21,13 @@ import org.jsoup.nodes.Document;
 public class DocumentCreator implements Callable<URLDocument> {
 	
 	private URLConnection connection;
+	private CrawlerConfig config;
 
 	/**
 	 * 
 	 */
-	public DocumentCreator(URLConnection connection) {
+	public DocumentCreator(CrawlerConfig config, URLConnection connection) {
+		this.config = config;
 		this.connection = connection;
 	}
 
@@ -32,14 +36,13 @@ public class DocumentCreator implements Callable<URLDocument> {
 	 */
 	@Override
 	public URLDocument call() throws Exception {
-		
+
 		try (InputStream inputStream = this.connection.getInputStream();) {
-			
 			Document document = Jsoup.parse(inputStream, this.connection.getContentEncoding(), this.connection.getURL().toString());
 			URLDocument urlDocument = new URLDocument(this.connection.getURL(), document);
 			return urlDocument;
 		} catch (Exception e) {
-			//Logger.getGlobal().log(Level.SEVERE, "Error parsing HTML", e);
+			this.config.getLogger().log(Level.SEVERE, "Error parsing HTML", e);
 		}
 		return null;
 	}

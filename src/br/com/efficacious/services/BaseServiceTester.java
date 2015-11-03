@@ -34,4 +34,12 @@ public abstract class BaseServiceTester {
 	public String getName() {		
 		return this.name;
 	}
+	
+	/**
+	 * {@inheritDoc Object}
+	 */
+	@Override
+	public String toString() {
+		return this.getName();
+	}
 }

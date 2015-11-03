@@ -4,10 +4,9 @@
 package br.com.efficacious.services;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.net.Socket;
-import java.net.SocketAddress;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Objects;
 
 /**
@@ -18,29 +17,29 @@ import java.util.Objects;
  */
 public class NetworkServiceTester extends BaseServiceTester {
 
-	private static final String TESTER_NAME = NetworkServiceTester.class.getName();
+	private static final String TESTER_NAME = NetworkServiceTester.class.getSimpleName();
 	
-	private InetSocketAddress address;
-	private SocketAddress proxyAddress;
+	private URL url;
+	private Proxy proxyAddress;
 	
 	/**
 	 * Creates a checker on the given host through the proxy.
 	 * 
 	 * @param address The address to try to connect.
-	 * @param socketAddress The proxy to go through
+	 * @param proxyAddress The proxy to go through
 	 */
-	public NetworkServiceTester(InetSocketAddress address, SocketAddress socketAddress) {
+	public NetworkServiceTester(URL address, Proxy proxyAddress) {
 		this(address);
-		this.proxyAddress = socketAddress;
+		this.proxyAddress = proxyAddress;
 	}
 	
 	/**
 	 * Creates a checker on the given host that try to connect to it.
-	 * @param address The address to try to connect.
+	 * @param url The address to try to connect.
 	 */
-	public NetworkServiceTester(InetSocketAddress address) {
+	public NetworkServiceTester(URL url) {
 		super(TESTER_NAME);
-		this.address = address;
+		this.url = url;
 	}
 
 	/**
@@ -49,22 +48,23 @@ public class NetworkServiceTester extends BaseServiceTester {
 	 */
 	@Override
 	public ServiceTestResponse test() throws IOException {
-		Objects.requireNonNull(this.address, "The address must not be null");
-		Socket socket = null;
+		Objects.requireNonNull(this.url, "The address should not be null");
+		URLConnection connection = null;
 		try {
-			if (this.proxyAddress != null) 
-				socket = new Socket(new Proxy(Proxy.Type.SOCKS, proxyAddress));
+			if (proxyAddress != null)
+				connection = this.url.openConnection(proxyAddress);
 			else
-				socket = new Socket();
-			socket.connect(address);
+				connection = this.url.openConnection();
+			
+			connection.connect(); 
 		} finally {
-			if (socket != null)
-				socket.close();
+			if (connection != null)
+				connection.getInputStream().close();
 		}
 		
 		return ServiceTestResponse
 				.builder(this)
 				.ok()
-				.message("Successfully test connection to: " + address.toString());
+				.message("Successfully test connection to: " + url.toString());
 	}
 }
