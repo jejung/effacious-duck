@@ -31,7 +31,7 @@ public class URLQueue {
 	}
 
 	public URLQueue() {
-		this.queue = new ArrayDeque<URL>();
+		this.queue = new ArrayDeque<>();
 		this.readLock = new ReentrantLock();
 		this.writeLock = new ReentrantLock();
 		this.isEmpty = new Object();
@@ -91,7 +91,8 @@ public class URLQueue {
 	private String getHostName(String urlInput) {
 		urlInput = urlInput.toLowerCase();
 		String hostName = urlInput;
-		if (!urlInput.equals("")) {
+		
+		if (!"".equals(urlInput)) {
 			if (urlInput.startsWith("http") || urlInput.startsWith("https")) {
 				try {
 					URL netUrl = new URL(urlInput);
@@ -102,9 +103,9 @@ public class URLQueue {
 				}
 			}
 			return hostName;
-		} else {
-			return "";
 		}
+		
+		return urlInput;
 	}
 
 	public URL pop() throws InterruptedException {

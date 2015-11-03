@@ -5,10 +5,17 @@ package br.com.efficacious.config;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.URLConnection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.jsoup.helper.HttpConnection;
 
+import br.com.efficacious.connection.ConnectionPredicate;
+import br.com.efficacious.crawler.WebCrawler;
+import br.com.efficacious.http.ContentTypeRepository;
 import br.com.efficacious.io.CrawlerLogHandler;
 import br.com.efficacious.io.LuceneDirectory;
 
@@ -26,6 +33,9 @@ public class CrawlerConfig {
 	private String luceneDirectory;
 	private InetSocketAddress testAddress;
 	private Logger logger;
+	private List<String> acceptedMedias;
+	private MediaStorage mediaStorage;
+	private List<ConnectionPredicate> connectionFilters;
 	
 	/**
 	 * Create a proxy based config.
@@ -64,7 +74,33 @@ public class CrawlerConfig {
 		this.proxy = null;
 		this.testAddress = new InetSocketAddress("www.google.com", 80);
 		this.logger = Logger.getGlobal();
+		this.acceptedMedias = new LinkedList<>();
+		this.connectionFilters = new LinkedList<>();
+		this.mediaStorage = MediaStorage.NONE;
 	}
+	
+	/**
+	 * Add a content-type string to the accepted medias list that the crawler will store, if the
+	 * {@link CrawlerConfig#mediaStorage} field is of type {@link MediaStorage#FILTERED}, any other 
+	 * value will ignore these values. You can create the string yourself or use the {@link ContentTypeRepository}
+	 * interface to get a list of the most used content-type parameters.
+	 * @param contentType The content-type string HTTP header parameter.
+	 */
+	public void addAcceptedMedia(String contentType) {
+		this.acceptedMedias.add(contentType);
+	}
+	
+	/**
+	 * Add a {@link ConnectionPredicate} to allow the filter of the accepted connections that the 
+	 * {@link WebCrawler} will use. The {@link URLConnection} will be openned when this predicate 
+	 * is called and will keep open if the return is {@code true} and immediatly closed and ignored if the
+	 * return is {@code false}.
+	 * @param predicate The predicate that filter the {@link URLConnection}.
+	 */
+	public void addConnectionFilter(ConnectionPredicate predicate) {
+		this.connectionFilters.add(predicate);
+	}
+	
 	/**
 	 * @return the proxy
 	 */
@@ -127,6 +163,33 @@ public class CrawlerConfig {
 		return new Builder();
 	}
 	
+	/**
+	 * @return the acceptedMedias
+	 */
+	public List<String> getAcceptedMedias() {
+		return Collections.unmodifiableList(this.acceptedMedias);
+	}
+
+	/**
+	 * @return the mediaStorage
+	 */
+	public MediaStorage getMediaStorage() {
+		return mediaStorage;
+	}
+	/**
+	 * @param mediaStorage the mediaStorage to set
+	 */
+	public void setMediaStorage(MediaStorage mediaStorage) {
+		this.mediaStorage = mediaStorage;
+	}
+	
+	/**
+	 * @return the connectionFilters
+	 */
+	public List<ConnectionPredicate> getConnectionFilters() {
+		return Collections.unmodifiableList(this.connectionFilters);
+	}
+
 	public static class Builder {
 		
 		private CrawlerConfig instance;
@@ -234,6 +297,41 @@ public class CrawlerConfig {
 		 */
 		public Builder logOn(String name) {
 			this.instance.setLogger(Logger.getLogger(name));
+			return this;
+		}
+		
+		/**
+		 * Ensure that the {@link WebCrawler} will store medias of the given format.
+		 * @param contentType The content type to accpet
+		 * @return {@code this} instance.
+		 * @see CrawlerConfig#addAcceptedMedia(String)
+		 * @see CrawlerConfig#setMediaStorage(MediaStorage)
+		 */
+		public Builder acceptMedia(String contentType) {
+			this.instance.setMediaStorage(MediaStorage.FILTERED);
+			this.instance.addAcceptedMedia(contentType);
+			return this;
+		}
+		
+		/**
+		 * Ensure that any format of media will be stored. 
+		 * @return {@code this} instance;
+		 * @see CrawlerConfig#addAcceptedMedia(String)
+		 * @see CrawlerConfig#setMediaStorage(MediaStorage)
+		 */
+		public Builder acceptAnyMedia() {
+			this.instance.setMediaStorage(MediaStorage.ANY);
+			return this;
+		}
+		
+		/**
+		 * Filter the {@link URLConnection}s that the {@link WebCrawler} can use.
+		 * @param predicate The predicate to filter.
+		 * @return {@code this} instance. 
+		 * @see CrawlerConfig#addConnectionFilter(ConnectionPredicate)
+		 */
+		public Builder filterConnections(ConnectionPredicate predicate) {
+			this.instance.addConnectionFilter(predicate);
 			return this;
 		}
 
