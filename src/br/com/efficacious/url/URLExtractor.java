@@ -14,10 +14,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import br.com.efficacious.config.CrawlerConfig;
+import br.com.efficacious.crawler.WebCrawler;
 
 /**
- * @author jean
- *
+ * This is the task responsible for the "spider" work. These workers find the urls
+ * on the pages and put it in the lifecycle of the {@link WebCrawler}.
+ * 
+ * @author Jean Jung
  */
 public class URLExtractor implements Callable<Void> {
 
@@ -28,7 +31,7 @@ public class URLExtractor implements Callable<Void> {
 	private CrawlerConfig config;
 
 	/**
-	 * 
+	 * Create a new {@link URLExtractor}.
 	 */
 	public URLExtractor(CrawlerConfig config, Semaphore realeseWhenDone, URLQueue queue, IntSupplier incrementCallback, Document document) {
 		this.config = config;
@@ -52,22 +55,19 @@ public class URLExtractor implements Callable<Void> {
 		return null;
 	}
 
+	/**
+	 * Extract all the urls from the element.
+	 * @param el
+	 */
 	private void extract(Element el) {
 
-		el.getAllElements().parallelStream().filter((e) -> {
+		el.getAllElements().parallelStream()
+		.filter((e) -> {
 			return "a".equals(e.tagName());
 		}).map((e) -> {
 			return e.absUrl("href");
-		}).filter((href) -> {
-			// TODO create an machanism to configure permission of https
-			// pages
-			// could be used to remove https pages, this would be
-			// configurable in the application
-			// if (href.startsWith("https")) {
-			// href = href.replaceFirst("s", "");
-			// }
-				return href != null && !href.isEmpty() && !(href.endsWith(".pdf") || href.endsWith(".jpg") || href.endsWith(".avi"));
-			}).forEach((href) -> {
+		}) .filter((href) -> href != null && !href.isEmpty())
+		.forEach((href) -> {
 			try {
 				this.queue.add(new URL(href), el.baseUri());
 			} catch (MalformedURLException e) {

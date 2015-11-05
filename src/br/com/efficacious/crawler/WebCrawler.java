@@ -7,11 +7,13 @@ import java.net.URL;
 import java.util.Objects;
 
 import br.com.efficacious.config.CrawlerConfig;
+import br.com.efficacious.config.MediaStorage;
 import br.com.efficacious.connection.ConnectionList;
 import br.com.efficacious.connection.ConnectionProducer;
 import br.com.efficacious.dom.HTMLList;
 import br.com.efficacious.dom.HTMLPull;
 import br.com.efficacious.dom.HTMLSpliterator;
+import br.com.efficacious.media.MediaList;
 import br.com.efficacious.services.BaseServiceTester;
 import br.com.efficacious.services.NetworkServiceTester;
 import br.com.efficacious.url.URLConsumer;
@@ -34,6 +36,7 @@ public class WebCrawler {
 	private volatile ConnectionList connectionList;
 	private volatile URLQueue urlQueue;
 	private volatile HTMLList htmlList;
+	private volatile MediaList mediaList;
 	
 	private ConnectionProducer connectionProducer;
 	private HTMLPull htmlPull;
@@ -79,8 +82,11 @@ public class WebCrawler {
 		this.connectionList = new ConnectionList(this.config);
 		this.htmlList = new HTMLList(this.config);
 		
+		if (this.config.getMediaStorage() != MediaStorage.NONE)
+			this.mediaList = new MediaList();
+		
 		this.connectionProducer = new ConnectionProducer(this.config, this.urlQueue, this.connectionList);
-		this.htmlPull = new HTMLPull(this.config, this.connectionList, this.htmlList);
+		this.htmlPull = new HTMLPull(this.config, this.connectionList, this.htmlList, this.mediaList);
 		this.urlConsumer = new URLConsumer(this.config, this.urlQueue);
 		this.htmlSpliterator = new HTMLSpliterator(this.config, this.htmlList, urlConsumer);
 	}
@@ -91,7 +97,6 @@ public class WebCrawler {
 	 * @return the {@link NetworkServiceTester} 
 	 */
 	private NetworkServiceTester createNetworkTest() {
-		
 		return new NetworkServiceTester(this.config.getTestAddress(), this.config.getProxy());
 	}
 	

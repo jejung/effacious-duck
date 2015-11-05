@@ -1,6 +1,5 @@
 package br.com.efficacious.dom;
 
-import java.io.IOException;
 import java.net.URLConnection;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -8,9 +7,8 @@ import java.util.logging.Level;
 import org.jsoup.helper.HttpConnection;
 
 import br.com.efficacious.config.CrawlerConfig;
-import br.com.efficacious.config.MediaStorage;
 import br.com.efficacious.connection.ConnectionList;
-import br.com.efficacious.http.ContentTypeRepository;
+import br.com.efficacious.connection.ContentTypeResolver;
 import br.com.efficacious.media.MediaList;
 
 /**
@@ -21,17 +19,20 @@ import br.com.efficacious.media.MediaList;
  */
 public class HTMLPull implements Runnable {
 
-	private ConnectionList connectionList;
-	private HTMLList htmlList;
+	private volatile ConnectionList connectionList;
+	private volatile HTMLList htmlList;
 	private MediaList mediaList;
 	private boolean alive;
 	private CrawlerConfig config;
+	private ContentTypeResolver contentTypeResolver;
 
-	public HTMLPull(CrawlerConfig config, ConnectionList connectionList, HTMLList htmlList) {
+	public HTMLPull(CrawlerConfig config, ConnectionList connectionList, HTMLList htmlList, MediaList mediaList) {
 		this.config = config;
 		this.connectionList = connectionList;
 		this.htmlList = htmlList;
+		this.mediaList = mediaList;
 		this.alive = true;
+		this.contentTypeResolver = new ContentTypeResolver(config);
 	}
 
 	@Override
@@ -47,62 +48,12 @@ public class HTMLPull implements Runnable {
 			try {
 				URLConnection con = this.connectionList.getAsFuture().get();
 				if (con != null) {
-					if (this.filterConnection(con)) {
-						if (this.isMedia(con)) {
-							if (this.filterMedia(con)) {
-								this.mediaList.add(con);
-								continue;
-							}
-						}
-						else {
-							htmlList.add(con);
-							continue;
-						}
-					}
-					
-					try {
-						con.getInputStream().close();
-					} catch (IOException e) {
-						this.config.getLogger().log(Level.SEVERE, "Error closing an unsued connection", e);
-					} 
+					this.contentTypeResolver.forwardConnection(con, htmlList, mediaList);
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				this.config.getLogger().log(Level.SEVERE, "Error producing connections", e);
 			}
 		}
-	}
-	/**
-	 * Verify if the connection contains a media that must be stored.
-	 * @param connection
-	 * @return
-	 */
-	private boolean filterMedia(URLConnection connection) {
-		return this.config.getMediaStorage() == MediaStorage.ANY || 
-			(this.config.getMediaStorage() != MediaStorage.NONE &&
-				this.config
-					.getAcceptedMedias()
-					.parallelStream()
-					.anyMatch((contentType) -> contentType.equals(connection)));  
-	}
-	
-	/**
-	 * Verify if the content-type of the connection is a Media or a HTML document.
-	 * @param connection
-	 * @return
-	 */
-	private boolean isMedia(URLConnection connection) {
-		return !ContentTypeRepository.HTML.equalsIgnoreCase(connection.getContentType());
-	}
-	
-	/**
-	 * Filter the connections that can be used.
-	 * @param connection
-	 * @return
-	 */
-	private boolean filterConnection(URLConnection connection) {
-		return this.config.getConnectionFilters()
-			.parallelStream()
-			.allMatch((predicate) -> predicate.accept(connection));
 	}
 
 	/**
