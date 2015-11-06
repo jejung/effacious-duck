@@ -19,7 +19,6 @@ import br.com.efficacious.connection.ConnectionPredicate;
 import br.com.efficacious.crawler.WebCrawler;
 import br.com.efficacious.http.ContentTypeRepository;
 import br.com.efficacious.io.CrawlerLogHandler;
-import br.com.efficacious.io.LuceneDirectory;
 
 /**
  * The basic configurations of a Efficacious Duck Crawler instance.
@@ -193,7 +192,11 @@ public class CrawlerConfig {
 	public List<ConnectionPredicate> getConnectionFilters() {
 		return Collections.unmodifiableList(this.connectionFilters);
 	}
-
+	
+	/**
+	 * Builder class for {@link CrawlerConfig}.
+	 * @author Jean Jung
+	 */
 	public static class Builder {
 		
 		private CrawlerConfig instance;
