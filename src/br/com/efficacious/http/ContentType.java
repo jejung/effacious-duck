@@ -4,6 +4,7 @@
 package br.com.efficacious.http;
 
 import java.net.URLConnection;
+import java.util.Objects;
 
 import br.com.efficacious.config.CrawlerConfig;
 import br.com.efficacious.config.MediaStorage;
@@ -63,7 +64,8 @@ public class ContentType {
 	 */
 	public boolean isDocument(CrawlerConfig config) throws InvalidContentTypeException {
 		this.loadContentType();
-		return ContentTypeRepository.HTML.equalsIgnoreCase(this.contentType) &&
+		return !Objects.isNull(this.contentType) && 
+				this.contentType.toLowerCase().contains(ContentTypeRepository.HTML) &&
 				config.getConnectionFilters()
 					.parallelStream()
 					.allMatch((predicate) -> predicate.accept(connection));
