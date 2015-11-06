@@ -98,7 +98,13 @@ public class URLConsumer implements Runnable {
 				extractorExecutor.submit(new URLExtractor(this.config, this.extractorsSemaphore, this.queue, this::mapped, document.getDocument()));
 
 				indexersSemaphore.acquire();
-				indexerExecutor.submit(new URLIndexer(this.indexersSemaphore, document));
+				indexerExecutor.submit(
+						URLIndexer.builder(this.config)
+							.index(document).andThen(() -> { 
+								indexersSemaphore.release();
+							})
+							.build()
+				);
 
 				full.signalAll();
 			} catch (InterruptedException e) {
