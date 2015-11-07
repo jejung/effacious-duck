@@ -8,6 +8,8 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
 import br.com.efficacious.config.CrawlerConfig;
+import br.com.efficacious.crawler.CrawlerComponent;
+import br.com.efficacious.crawler.WebCrawler;
 import br.com.efficacious.url.URLQueue;
 
 /**
@@ -15,7 +17,7 @@ import br.com.efficacious.url.URLQueue;
  * @author Johnny W. G. G.
  *
  */
-public class ConnectionProducer implements Runnable {
+public class ConnectionProducer extends CrawlerComponent {
 
 	private static final int MAX_CONNECTIONS = 5;
 
@@ -40,6 +42,9 @@ public class ConnectionProducer implements Runnable {
 		this.produceForever();
 	}
 	
+	/**
+	 * Produces untill the {@link WebCrawler} is stopped.
+	 */
 	private void produceForever() {
 		while (isAlive()) {
 			try {
@@ -62,6 +67,16 @@ public class ConnectionProducer implements Runnable {
 	 */
 	public synchronized void setAlive(boolean alive) {
 		this.alive = alive;
+	}
+
+	/**
+	 * Stop to produce connections and clean up the 
+	 */
+	@Override
+	public synchronized void stop() {
+		if (this.alive) {
+			this.setAlive(false);
+		}
 	}
 
 }

@@ -22,11 +22,9 @@ public abstract class BaseServiceTester {
 	/**
 	 * The default behavior of a {@link BaseServiceTester} must be check the service
 	 * and return the {@link ServiceStatus}. 
-	 * @return {@code OK;}
+	 * @return The status of the test.
 	 */
-	public ServiceTestResponse test() throws Exception {
-		return ServiceTestResponse.builder(this).ok().noMessage(); 
-	}
+	public abstract ServiceTestResponse test() throws Exception;
 
 	/**
 	 * @return The name

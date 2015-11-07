@@ -10,13 +10,13 @@ import br.com.efficacious.config.CrawlerConfig;
 import br.com.efficacious.config.MediaStorage;
 import br.com.efficacious.connection.ConnectionList;
 import br.com.efficacious.connection.ConnectionProducer;
-import br.com.efficacious.dom.HTMLList;
-import br.com.efficacious.dom.HTMLPull;
-import br.com.efficacious.dom.HTMLSpliterator;
+import br.com.efficacious.dom.DocumentList;
+import br.com.efficacious.dom.DocumentPull;
+import br.com.efficacious.dom.DocumentSpliterator;
 import br.com.efficacious.media.MediaList;
 import br.com.efficacious.services.BaseServiceTester;
 import br.com.efficacious.services.NetworkServiceTester;
-import br.com.efficacious.url.URLConsumer;
+import br.com.efficacious.url.DocumentConsumer;
 import br.com.efficacious.url.URLQueue;
 
 /**
@@ -24,7 +24,7 @@ import br.com.efficacious.url.URLQueue;
  * it's the entry point to all operations in the EfiicaciousAPI. You must configure it, choose the operations
  * you need and start them.
  * The {@link WebCrawler} is self fed and don't need nothing more than the initial list of web sites to be visited. 
- * You can add sites by calling {@link #addURL(URL)} method.
+ * You can add sites by calling {@link #addBaseURL(URL)} method.
  * 
  * @author Jean Jung
  */
@@ -35,13 +35,13 @@ public class WebCrawler {
 	
 	private volatile ConnectionList connectionList;
 	private volatile URLQueue urlQueue;
-	private volatile HTMLList htmlList;
+	private volatile DocumentList htmlList;
 	private volatile MediaList mediaList;
 	
 	private ConnectionProducer connectionProducer;
-	private HTMLPull htmlPull;
-	private URLConsumer urlConsumer;
-	private HTMLSpliterator htmlSpliterator;
+	private DocumentPull htmlPull;
+	private DocumentConsumer urlConsumer;
+	private DocumentSpliterator htmlSpliterator;
 	
 	/**
 	 * Creates a basic {@link WebCrawler} with the default {@link CrawlerConfig}.
@@ -70,7 +70,7 @@ public class WebCrawler {
 	 * {@link WebCrawler} alive and producing.
 	 * @param url
 	 */
-	public void addURL(URL url) {
+	public void addBaseURL(URL url) {
 		this.urlQueue.add(url, null);
 	}
 	
@@ -80,15 +80,15 @@ public class WebCrawler {
 	 */
 	private void createComponents() {
 		this.connectionList = new ConnectionList(this.config);
-		this.htmlList = new HTMLList(this.config);
+		this.htmlList = new DocumentList(this.config);
 		
 		if (this.config.getMediaStorage() != MediaStorage.NONE)
 			this.mediaList = new MediaList();
 		
 		this.connectionProducer = new ConnectionProducer(this.config, this.urlQueue, this.connectionList);
-		this.htmlPull = new HTMLPull(this.config, this.connectionList, this.htmlList, this.mediaList);
-		this.urlConsumer = new URLConsumer(this.config, this.urlQueue);
-		this.htmlSpliterator = new HTMLSpliterator(this.config, this.htmlList, urlConsumer);
+		this.htmlPull = new DocumentPull(this.config, this.connectionList, this.htmlList, this.mediaList);
+		this.urlConsumer = new DocumentConsumer(this.config, this.urlQueue);
+		this.htmlSpliterator = new DocumentSpliterator(this.config, this.htmlList, urlConsumer);
 	}
 	
 	/**
@@ -135,10 +135,10 @@ public class WebCrawler {
 	 * Safely stop the {@link WebCrawler} by gradually making them without resources.
 	 */
 	public void stop() {
-		this.urlConsumer.setAlive(false);		
-		this.htmlSpliterator.setAlive(false);
-		this.htmlPull.setAlive(false);
-		this.connectionProducer.setAlive(false);
+		this.urlConsumer.stop();
+		this.connectionProducer.stop();
+		this.htmlPull.stop();
+		this.htmlSpliterator.stop();
 	}
 	
 	/**

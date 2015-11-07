@@ -19,11 +19,14 @@ public class CrawlerException extends RuntimeException {
 	private static final long serialVersionUID = -7912430439197689766L;
 	
 	/**
-	 * 
+	 * {@inheritDoc RuntimeException}
 	 */
 	public CrawlerException() {
 	}
 	
+	/**
+	 * {@inheritDoc RuntimeException}
+	 */
 	public CrawlerException(String message) {
 		super(message);
 	}

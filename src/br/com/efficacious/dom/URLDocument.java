@@ -8,8 +8,9 @@ import java.net.URL;
 import org.jsoup.nodes.Document;
 
 /**
+ * This is a POJO class just to handle the information about a {@link Document}.
+ * 
  * @author Jean Jung
- *
  */
 public class URLDocument {
 	

@@ -35,8 +35,8 @@ public class ContentType {
 	 * @throws InvalidContentTypeException
 	 */
 	public void loadContentType() throws InvalidContentTypeException {
-		if (this.contentType == null)
-			this.contentType = this.connection.getContentType();
+		if (this.contentType == null && this.connection.getContentType() != null)
+			this.contentType = this.connection.getContentType().toLowerCase();
 		
 		if (this.contentType == null)
 			throw new InvalidContentTypeException(this);
@@ -51,10 +51,9 @@ public class ContentType {
 		this.loadContentType();
 		return config.getMediaStorage() != MediaStorage.NONE &&
 				(config.getMediaStorage() == MediaStorage.ANY || 
-				config
-					.getAcceptedMedias()
+				(config.getAcceptedMedias()
 					.parallelStream()
-					.anyMatch((contentType) -> contentType.equalsIgnoreCase(this.contentType)));
+					.anyMatch((contentType) -> this.contentType.contains(contentType))));
 	}
 	
 	/**
@@ -65,10 +64,10 @@ public class ContentType {
 	public boolean isDocument(CrawlerConfig config) throws InvalidContentTypeException {
 		this.loadContentType();
 		return !Objects.isNull(this.contentType) && 
-				this.contentType.toLowerCase().contains(ContentTypeRepository.HTML) &&
-				config.getConnectionFilters()
+				this.contentType.contains(ContentTypeRepository.HTML) &&
+				(config.getConnectionFilters()
 					.parallelStream()
-					.allMatch((predicate) -> predicate.accept(connection));
+					.allMatch((predicate) -> predicate.accept(connection)));
 	}
 
 	/**

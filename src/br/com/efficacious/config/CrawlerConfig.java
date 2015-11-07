@@ -8,10 +8,15 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.jsoup.helper.HttpConnection;
 
@@ -32,6 +37,7 @@ public class CrawlerConfig {
 	
 	private Proxy proxy;
 	private String luceneDirectory;
+	private boolean indexContent;
 	private URL testAddress;
 	private Logger logger;
 	private List<String> acceptedMedias;
@@ -77,8 +83,6 @@ public class CrawlerConfig {
 			this.testAddress = new URL("http", "www.google.com", 80, "");
 		} catch (MalformedURLException e) { }
 		this.logger = Logger.getGlobal();
-		this.acceptedMedias = new LinkedList<>();
-		this.connectionFilters = new LinkedList<>();
 		this.mediaStorage = MediaStorage.NONE;
 	}
 	
@@ -90,7 +94,36 @@ public class CrawlerConfig {
 	 * @param contentType The content-type string HTTP header parameter.
 	 */
 	public void addAcceptedMedia(String contentType) {
-		this.acceptedMedias.add(contentType);
+		Objects.requireNonNull(contentType, "The content-type should not be null");
+		this.ensureAcceptedMedias();
+		this.acceptedMedias.add(contentType.toLowerCase());
+	}
+	
+	/**
+	 * Add all content types inside the {@link Collection} to list of accepted medias that the {@link WebCrawler} will
+	 * store.
+	 * 
+	 * @see CrawlerConfig#addAcceptedMedia(String)
+	 * 
+	 * @param contentTypes The list of content-types to add.
+	 */
+	public void acceptAllMedias(Collection<String> contentTypes) {
+		Objects.requireNonNull(contentTypes, "The list of content types should not be null");
+		this.ensureAcceptedMedias();
+		this.acceptedMedias.addAll(
+			contentTypes
+				.stream()
+				.map((contentType) -> contentType.toLowerCase())
+				.collect(Collectors.toList())
+		);
+	}
+	
+	/**
+	 * Ensure that we have a accepted medias list. 
+	 */
+	private void ensureAcceptedMedias() {
+		if (this.acceptedMedias == null)
+			this.acceptedMedias = new LinkedList<>();
 	}
 	
 	/**
@@ -101,7 +134,28 @@ public class CrawlerConfig {
 	 * @param predicate The predicate that filter the {@link URLConnection}.
 	 */
 	public void addConnectionFilter(ConnectionPredicate predicate) {
+		this.ensureConnectionFilters();
 		this.connectionFilters.add(predicate);
+	}
+	
+	/**
+	 * Ensure that we have a connection filters list.
+	 */
+	private void ensureConnectionFilters() {
+		if (this.connectionFilters == null)
+			this.connectionFilters = new LinkedList<>();
+	}
+	
+	/**
+	 * Add all filters to the filter list of connections;
+	 * 
+	 * @see CrawlerConfig#addConnectionFilter(ConnectionPredicate)
+	 * 
+	 * @param predicates The list of filters to add.
+	 */
+	public void addAllConnectionFilters(Collection<ConnectionPredicate> predicates) {
+		this.ensureConnectionFilters();
+		this.connectionFilters.addAll(predicates);
 	}
 	
 	/**
@@ -170,7 +224,9 @@ public class CrawlerConfig {
 	 * @return the acceptedMedias
 	 */
 	public List<String> getAcceptedMedias() {
-		return Collections.unmodifiableList(this.acceptedMedias);
+		if (this.acceptedMedias != null)
+			return Collections.unmodifiableList(this.acceptedMedias);
+		return Collections.emptyList();
 	}
 
 	/**
@@ -190,24 +246,45 @@ public class CrawlerConfig {
 	 * @return the connectionFilters
 	 */
 	public List<ConnectionPredicate> getConnectionFilters() {
-		return Collections.unmodifiableList(this.connectionFilters);
+		if (this.connectionFilters != null)
+			return Collections.unmodifiableList(this.connectionFilters);
+		
+		return Collections.emptyList();
 	}
 	
+	/**
+	 * @return the indexContent
+	 */
+	public boolean isIndexContent() {
+		return indexContent;
+	}
+	/**
+	 * @param indexContent the indexContent to set
+	 */
+	public void setIndexContent(boolean indexContent) {
+		this.indexContent = indexContent;
+	}
+
 	/**
 	 * Builder class for {@link CrawlerConfig}.
 	 * @author Jean Jung
 	 */
 	public static class Builder {
 		
-		private CrawlerConfig instance;
+		private Logger logger;
+		private String luceneDirectory;
+		private Proxy proxy;
+		private URL testAddress;
+		private MediaStorage mediaStorage;
+		private List<ConnectionPredicate> connectionFilters;
+		private Level logLevel;
+		private List<String> acceptedMedias;
 		
 		/**
 		 * Create a {@link CrawlerConfig} builder to help you configure the valid
 		 * options on the {@link CrawlerConfig} instance. 
 		 */
-		private Builder() {
-			this.instance = new CrawlerConfig();
-		}
+		private Builder() { }
 		
 		/**
 		 * Adds the proxy option to enable the proxy based {@link HttpConnection}s
@@ -216,7 +293,7 @@ public class CrawlerConfig {
 		 * @return {@code this} instance
 		 */
 		public Builder useProxy(Proxy proxy) {
-			this.instance.setProxy(proxy);
+			this.proxy = proxy;
 			return this;
 		}
 		
@@ -227,7 +304,7 @@ public class CrawlerConfig {
 		 * @return {@code this} instance
 		 */
 		public Builder storeIndexOn(String directory) {
-			this.instance.setLuceneDirectory(directory);
+			this.luceneDirectory = directory;
 			return this;
 		}
 		
@@ -244,7 +321,7 @@ public class CrawlerConfig {
 		 * @return {@code this} instance
 		 */
 		public Builder makeConnectionTest(URL at) {
-			this.instance.setTestAddress(at);
+			this.testAddress = at;
 			return this;
 		}
 		
@@ -288,7 +365,7 @@ public class CrawlerConfig {
 				} else if ("-d".equals(args[i])) {
 					result = result.storeIndexOn(args[++i]);
 				} else if ("-l".equals(args[i])) {
-					result = result.logOn(args[++i]);
+					result = result.withLogLevel(Level.parse(args[++i]));
 				}
 			}
 			return result;
@@ -299,11 +376,22 @@ public class CrawlerConfig {
 		 * all the informations on a specific console handler called {@link CrawlerLogHandler},
 		 * by now this option cannot be ignored.
 		 * 
-		 * @param name 
+		 * @param logger 
 		 * @return
 		 */
-		public Builder logOn(String name) {
-			this.instance.setLogger(Logger.getLogger(name));
+		public Builder logOn(Logger logger) {
+			this.logger = logger;
+			return this;
+		}
+		
+		/**
+		 * Specify the level that the logger attached to the {@link CrawlerConfig} will use.
+		 *  
+		 * @param level
+		 * @return
+		 */
+		public Builder withLogLevel(Level level) {
+			this.logLevel = level; 
 			return this;
 		}
 		
@@ -315,8 +403,10 @@ public class CrawlerConfig {
 		 * @see CrawlerConfig#setMediaStorage(MediaStorage)
 		 */
 		public Builder acceptMedia(String contentType) {
-			this.instance.setMediaStorage(MediaStorage.FILTERED);
-			this.instance.addAcceptedMedia(contentType);
+			this.mediaStorage = MediaStorage.FILTERED;
+			if (this.acceptedMedias == null)
+				this.acceptedMedias = new LinkedList<>(); 
+			this.acceptedMedias.add(contentType);
 			return this;
 		}
 		
@@ -327,7 +417,7 @@ public class CrawlerConfig {
 		 * @see CrawlerConfig#setMediaStorage(MediaStorage)
 		 */
 		public Builder acceptAnyMedia() {
-			this.instance.setMediaStorage(MediaStorage.ANY);
+			this.mediaStorage = MediaStorage.ANY;
 			return this;
 		}
 		
@@ -338,7 +428,9 @@ public class CrawlerConfig {
 		 * @see CrawlerConfig#addConnectionFilter(ConnectionPredicate)
 		 */
 		public Builder filterConnections(ConnectionPredicate predicate) {
-			this.instance.addConnectionFilter(predicate);
+			if (this.connectionFilters == null)
+				this.connectionFilters = new LinkedList<>();
+			this.connectionFilters.add(predicate);
 			return this;
 		}
 
@@ -348,7 +440,25 @@ public class CrawlerConfig {
 		 * @return the parametrized instance of the {@link CrawlerConfig}.
 		 */
 		public CrawlerConfig build() {
-			return this.instance;
+			CrawlerConfig instance = new CrawlerConfig();
+			
+			Optional.ofNullable(this.logger).ifPresent(instance::setLogger);
+			
+			Optional.ofNullable(this.luceneDirectory).ifPresent(instance::setLuceneDirectory);
+			
+			Optional.ofNullable(this.logLevel).ifPresent(instance.logger::setLevel);
+			
+			Optional.ofNullable(this.proxy).ifPresent(instance::setProxy);
+			
+			Optional.ofNullable(this.mediaStorage).ifPresent(instance::setMediaStorage);
+			
+			Optional.ofNullable(this.testAddress).ifPresent(instance::setTestAddress);
+			
+			Optional.ofNullable(this.acceptedMedias).ifPresent(instance::acceptAllMedias);
+			
+			Optional.ofNullable(this.connectionFilters).ifPresent(instance::addAllConnectionFilters);
+			
+			return instance;
 		}
 	}
 }

@@ -9,12 +9,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
 import br.com.efficacious.config.CrawlerConfig;
+import br.com.efficacious.connection.ConnectionProducer;
 
 /**
- * Class that handle and URL queue to be consumed by Connection Producer.
+ * Class that handle and URL queue to be consumed by the {@link ConnectionProducer}.
  * 
  * @author johnny w. g. g.
- *
+ * @author Jean Jung
  */
 public class URLQueue {
 

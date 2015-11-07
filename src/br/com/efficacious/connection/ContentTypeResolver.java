@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
 import br.com.efficacious.config.CrawlerConfig;
-import br.com.efficacious.dom.HTMLList;
+import br.com.efficacious.dom.DocumentList;
 import br.com.efficacious.exception.InvalidContentTypeException;
 import br.com.efficacious.http.ContentType;
 import br.com.efficacious.media.MediaList;
@@ -37,7 +37,7 @@ public class ContentTypeResolver {
 	 * Resolve what to do with the {@link URLConnection}.
 	 * @param connection
 	 */
-	public void forwardConnection(URLConnection connection, HTMLList documents, MediaList medias) {
+	public void forwardConnection(URLConnection connection, DocumentList documents, MediaList medias) {
 		ContentType contentType = new ContentType(connection);
 		try {
 			if (contentType.isMedia(this.config)) {
@@ -46,6 +46,8 @@ public class ContentTypeResolver {
 			}else if (contentType.isDocument(this.config)) {
 				documents.add(connection);
 				return;
+			} else {
+				this.config.getLogger().info(String.format("URL ignored due to content-type %s: %s ", connection.getContentType(), connection.getURL()));
 			}
 		} catch (InvalidContentTypeException e) {
 		}

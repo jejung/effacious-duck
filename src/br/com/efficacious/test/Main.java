@@ -27,11 +27,12 @@ public class Main {
 		CrawlerConfig config = CrawlerConfig
 								.builder()
 								.initFromArgs(args)
-								.logOn(crawlerLogger.getName())
+								.logOn(crawlerLogger)
 								.build();
 		WebCrawler crawler = new WebCrawler(config);
-		crawler.addURL(new URL("http://www.globo.com"));
-		crawler.addURL(new URL("http://www.furb.br"));
+		crawler.addBaseURL(new URL("http://www.globo.com"));
+		crawler.addBaseURL(new URL("http://www.furb.br"));
 		crawler.start();
+//		crawler.stop();
 	}
 }
